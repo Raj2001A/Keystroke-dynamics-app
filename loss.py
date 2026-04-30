@@ -1,14 +1,26 @@
 import  os;
-import  tensorflow_addons   as tfa;
+import  numpy                       as      np;
 
 import  sys;
 import  tensorflow                  as      tf;
 from    tensorflow.keras.losses     import  Loss;
-from    tensorflow_addons.losses    import  metric_learning;
 
 import  conf;
 
 
+def pairwise_distance(embeddings, squared=False):
+    """
+    Compute pairwise Euclidean distance matrix.
+    Replaces deprecated tensorflow_addons.losses.metric_learning.pairwise_distance
+    """
+    dot_product = tf.matmul(embeddings, tf.transpose(embeddings));
+    square_norm = tf.linalg.diag_part(dot_product);
+    distances = tf.expand_dims(square_norm, 1) - 2.0 * dot_product + tf.expand_dims(square_norm, 0);
+    distances = tf.maximum(distances, 0.0);
+    if not squared:
+        mask = tf.cast(tf.equal(distances, 0.0), tf.float32);
+        distances = tf.sqrt(distances + mask * 1e-16) * (1.0 - mask);
+    return distances;
 
 
 
@@ -23,9 +35,15 @@ def calculate_set2set_loss(y_true, y_pred, K, p, beta) -> tf.Tensor:
     precise_embeddings = (
         tf.cast(embeddings, tf.dtypes.float32) if convert_to_float32 else embeddings
     );
+    tf.debugging.assert_all_finite(
+        precise_embeddings,
+        "Set2SetLoss received non-finite embeddings (NaN/Inf)."
+    );
 
-    pdist_matrix = metric_learning.pairwise_distance(
-        precise_embeddings, squared=False
+    pdist_matrix = pairwise_distance(precise_embeddings, squared=False);
+    tf.debugging.assert_all_finite(
+        pdist_matrix,
+        "Set2SetLoss pairwise distance matrix became non-finite."
     );
 
     retval = 0.0;
@@ -62,6 +80,7 @@ def calculate_set2set_loss(y_true, y_pred, K, p, beta) -> tf.Tensor:
         total_radius += mean_distance;
 
     total_radius /= K;
+    total_radius = tf.maximum(total_radius, tf.cast(1e-8, total_radius.dtype));
     total_penalty = 0.0;
     for i in range(0, K):
         legitimate_embeddings = precise_embeddings[conf.N * i:conf.N * i + conf.N];
@@ -84,18 +103,12 @@ class Set2SetLoss(Loss):
         self.K = K;
         self.beta = beta;
 
-        p = tf.zeros([conf.N, conf.N, conf.N], dtype=float)
-
-        for i in range(0,conf.N):
-          for j in range(i + 1,conf.N):
-            for k in range(0,conf.N):
-              position = [i, j, k]
-              new_value = 1.0
-              index = tf.constant([position])
-              update = tf.constant([new_value])
-              p = tf.tensor_scatter_nd_update(p, index, update);
-
-        self.p = p;
+        # Vectorized mask construction (replaces O(N³) scatter updates)
+        p = np.zeros([conf.N, conf.N, conf.N], dtype=np.float32)
+        for i in range(conf.N):
+            for j in range(i + 1, conf.N):
+                p[i, j, :] = 1.0
+        self.p = tf.constant(p);
 
 
     def call(self, y_true, y_pred):
@@ -106,4 +119,3 @@ class Set2SetLoss(Loss):
 def get_loss():
     print("    Set2Set (beta=" + str(conf.BETA) + ")");
     return Set2SetLoss(conf.K, conf.BETA);
-

@@ -12,6 +12,25 @@ class RandomSetsGenerator:
         self.K = K;
     
         self.users = list(self.x.keys());
+        if len(self.users) < self.K:
+            raise ValueError(
+                f"RandomSetsGenerator requires at least K users (K={self.K}, users={len(self.users)}). "
+                "Lower conf.K or ingest more users."
+            );
+
+        # Pre-cache N samples per user (oversample if needed)
+        self.user_samples = {};
+        for user_id, samples in self.x.items():
+            sample_list = [np.asarray(s, dtype=np.float32) for s in samples.values()];
+            self.user_samples[user_id] = np.stack(sample_list, axis=0);
+
+
+    def _draw_user_samples(self, user_id):
+        pool = self.user_samples[user_id];
+        total = pool.shape[0];
+        replace = total < conf.N;
+        picked = np.random.choice(total, size=conf.N, replace=replace);
+        return pool[picked];
 
 
     def get_random_sets_batch(self):
@@ -20,21 +39,11 @@ class RandomSetsGenerator:
 
         batch_users = random.sample(self.users, self.K);
         
-        i = -1;
-        for batch_user in batch_users:
-            i += 1;
-            samples = self.x[batch_user];
-            
-            count = 0;
-            for sample_id, sample in samples.items():
-                X.append(sample);
-                Y.append(i);
-                
-                count += 1;
-                if count > conf.N:
-                    break;
+        for i, batch_user in enumerate(batch_users):
+            X.append(self._draw_user_samples(batch_user));
+            Y.extend([i] * conf.N);
 
-        return np.stack(X), np.stack(Y);
+        return np.concatenate(X, axis=0), np.stack(Y);
 
 
     def __call__(self):

@@ -86,27 +86,66 @@ class SelfAttnSequences(Layer):
 
 
 
-class ChannelAttention1D(Layer):
+class SqueezeExcitation1D(Layer):
+    """Squeeze-and-Excitation block: uses both avg-pool and max-pool for richer channel statistics."""
     def __init__(self, reduction_ratio=16, **kwargs):
-        super(ChannelAttention1D, self).__init__(**kwargs)
+        super(SqueezeExcitation1D, self).__init__(**kwargs)
         self.reduction_ratio = reduction_ratio
 
     def build(self, input_shape):
         self.filters = input_shape[-1]
-        self.fc1 = tf.keras.layers.Dense(self.filters // self.reduction_ratio, activation='relu')
+        reduced = max(self.filters // self.reduction_ratio, 1)
+        self.fc1 = tf.keras.layers.Dense(reduced, activation='relu')
         self.fc2 = tf.keras.layers.Dense(self.filters, activation='sigmoid')
 
     def call(self, inputs):
-        avg_pool = tf.keras.layers.GlobalAveragePooling1D()(inputs)
-        fc1_out = self.fc1(avg_pool)
-        fc2_out = self.fc2(fc1_out)
-        attention = tf.keras.layers.Reshape((1, self.filters))(fc2_out)
-        scaled_features = tf.keras.layers.Multiply()([inputs, attention])
-        return scaled_features
+        # Dual-pooling: avg + max for richer channel descriptors
+        avg_pool = tf.reduce_mean(inputs, axis=1);
+        max_pool = tf.reduce_max(inputs, axis=1);
+        combined = avg_pool + max_pool;
+        fc1_out = self.fc1(combined);
+        fc2_out = self.fc2(fc1_out);
+        attention = tf.keras.layers.Reshape((1, self.filters))(fc2_out);
+        scaled_features = tf.keras.layers.Multiply()([inputs, attention]);
+        return scaled_features;
+
+
+class LearnableFusionGate(Layer):
+    """Learnable gating mechanism to weight the contribution of each branch."""
+    def __init__(self, **kwargs):
+        super(LearnableFusionGate, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # input_shape is a list of shapes when call() has multiple positional args
+        if isinstance(input_shape, list):
+            self.branch1_dim = input_shape[0][-1]
+            self.branch2_dim = input_shape[1][-1]
+        else:
+            # Fallback: assume single concatenated input
+            self.branch1_dim = input_shape[-1] // 2
+            self.branch2_dim = input_shape[-1] // 2
+
+        total_dim = self.branch1_dim + self.branch2_dim
+        self.gate = tf.keras.layers.Dense(total_dim, activation='sigmoid')
+        super(LearnableFusionGate, self).build(input_shape)
+
+    def call(self, inputs):
+        branch1, branch2 = inputs
+        # SHAPE SAFETY: branch1_dim and branch2_dim are stored as static ints during build()
+        # Current Config:
+        #   branch1 (Bi-LSTM): 2 * MODEL_WIDTH   = 2 * 512 = 1024
+        #   branch2 (Conv GAP): 4 * MODEL_FILTERS = 4 * 256 = 1024
+        concatenated = tf.concat([branch1, branch2], axis=-1);
+        g = self.gate(concatenated);
+        # Use STATIC integer dim1 (not tf.shape) — required for Keras graph construction
+        dim1 = int(self.branch1_dim);
+        g1 = g[:, :dim1];
+        g2 = g[:, dim1:];
+        return g1 * branch1 + g2 * branch2;
+
 
     
-
-def get_model_Type2Branch(descriptor):
+def get_model_Type2Branch(descriptor, build_optimizer=True):
   print("Model configuration:");
   print("  WIDTH:   " + str(conf.MODEL_WIDTH));
   print("  FILTERS: " + str(conf.MODEL_FILTERS));
@@ -115,15 +154,19 @@ def get_model_Type2Branch(descriptor):
 
   retval = descriptor;
   retval["name"] = "KVCwinner";
-  retval["optimizer"] = tf.keras.optimizers.Adam(0.0001);
-  retval["normalized"] = False;
-  retval["epochs"] = 600;   
+  if build_optimizer:
+    retval["optimizer"] = tf.keras.optimizers.Adam(0.0001);  # Paper: LR=1e-4, default betas
+  else:
+    retval["optimizer"] = None;
+  retval["normalized"] = False;  # Paper: no L2 normalization
+  retval["epochs"] = conf.EPOCHS;   
   retval["threshold"] = 0.86; 
   
   li  = tf.keras.layers.Input(shape=(descriptor["SEQUENCE_LENGTH"], descriptor["INPUT_FEATURES"]));
   ke = EmbedAndConcatLayer(256,8)(li);
   bn1 = tf.keras.layers.BatchNormalization()(ke);
 
+  # Branch 1: Recurrent (Bi-GRU + Self-Attention) — Paper Sec III-D, Table IV
   p1_ta = TemporalAttention(units=conf.MODEL_WIDTH)(bn1);
   p1_bgru1 = tf.keras.layers.Bidirectional(tf.keras.layers.GRU(conf.MODEL_WIDTH, return_sequences=True))(p1_ta);
   p1_bn1 = tf.keras.layers.BatchNormalization()(p1_bgru1);
@@ -133,27 +176,46 @@ def get_model_Type2Branch(descriptor):
   p1_bn2 = tf.keras.layers.BatchNormalization()(p1_bgru2);
   p1_d2 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(p1_bn2);
 
+  # Branch 2: Convolutional (Conv1D + SE Attention + Residual Connections)
   p2_ta = TemporalAttention(units=conf.MODEL_WIDTH)(bn1);
-  p2_c1 = tf.keras.layers.Conv1D(filters=conf.MODEL_FILTERS, kernel_size=6, activation="relu")(p2_ta);
+  p2_sd = tf.keras.layers.SpatialDropout1D(conf.MODEL_DROPOUT * 0.5)(p2_ta);  # SpatialDropout breaks channel correlations
+
+  # Conv Block 1
+  p2_c1 = tf.keras.layers.Conv1D(filters=conf.MODEL_FILTERS, kernel_size=6, activation="relu", padding="same")(p2_sd);
   p2_bn1 = tf.keras.layers.BatchNormalization()(p2_c1);
   p2_d1 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(p2_bn1);
-  p2_a1 = ChannelAttention1D()(p2_d1);
-  p2_c2 = tf.keras.layers.Conv1D(filters=2*conf.MODEL_FILTERS, kernel_size=6, activation="relu")(p2_a1);
+  p2_a1 = SqueezeExcitation1D()(p2_d1);
+
+  # Conv Block 2 (with residual connection)
+  # Paper Table IV: 2 * MODEL_FILTERS = 512 filters
+  p2_c2 = tf.keras.layers.Conv1D(filters=2*conf.MODEL_FILTERS, kernel_size=6, activation="relu", padding="same")(p2_a1);
   p2_bn2 = tf.keras.layers.BatchNormalization()(p2_c2);
   p2_d2 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(p2_bn2);
-  p2_a2 = ChannelAttention1D()(p2_d2);
-  p2_c3 = tf.keras.layers.Conv1D(filters=4*conf.MODEL_FILTERS, kernel_size=6, activation="relu")(p2_a2);
+  # 1x1 projection on skip path: 256 → 512 (dimension mismatch requires projection)
+  p2_skip1 = tf.keras.layers.Conv1D(filters=2*conf.MODEL_FILTERS, kernel_size=1, padding="same")(p2_a1);
+  p2_res1 = tf.keras.layers.Add()([p2_d2, p2_skip1]);  # Residual: skip over conv block 2
+  p2_a2 = SqueezeExcitation1D()(p2_res1);
+
+  # Conv Block 3 (no residual — dimension changes to 4*FILTERS)
+  p2_c3 = tf.keras.layers.Conv1D(filters=4*conf.MODEL_FILTERS, kernel_size=6, activation="relu", padding="same")(p2_a2);
   p2_bn3 = tf.keras.layers.BatchNormalization()(p2_c3);
   p2_d3 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(p2_bn3);
-  p2_a3 = ChannelAttention1D()(p2_d3);
+  p2_a3 = SqueezeExcitation1D()(p2_d3);
   p2_g = tf.keras.layers.GlobalAveragePooling1D()(p2_a3);
   p2_d4 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(p2_g);
 
+  # Embedding Head — Paper Sec III-D: concatenation + 3 dense layers
   im = tf.keras.layers.Concatenate()([p1_d2, p2_d4]);
-  m_dense = tf.keras.layers.Dense(conf.MODEL_WIDTH, activation="relu")(im);
-  m_bn = tf.keras.layers.BatchNormalization()(m_dense);
-  m_d = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(m_bn);
-  lo = tf.keras.layers.Dense(256, activation=None)(m_d);
+  m_dense1 = tf.keras.layers.Dense(conf.MODEL_WIDTH, activation="relu")(im);
+  m_bn1 = tf.keras.layers.BatchNormalization()(m_dense1);
+  m_d1 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(m_bn1);
+  m_dense2 = tf.keras.layers.Dense(conf.MODEL_WIDTH // 2, activation="relu")(m_d1);
+  m_bn2 = tf.keras.layers.BatchNormalization()(m_dense2);
+  m_d2 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(m_bn2);
+  m_dense3 = tf.keras.layers.Dense(conf.MODEL_WIDTH // 4, activation="relu")(m_d2);
+  m_bn3 = tf.keras.layers.BatchNormalization()(m_dense3);
+  m_d3 = tf.keras.layers.Dropout(conf.MODEL_DROPOUT)(m_bn3);
+  lo = tf.keras.layers.Dense(256, activation=None)(m_d3);
   
   retval["model"] = tf.keras.Model(inputs=li, outputs=lo);
   return retval;

@@ -1,29 +1,49 @@
-import  numpy   as np;
-import  os;
-import  random;
-import  sys;
+import argparse
+import numpy as np
+import os
+import random
+import sys
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(SCRIPT_DIR)
+os.environ.setdefault("TF_FORCE_GPU_ALLOW_GROWTH", "true")
 
 
-IMPOSTORS_PER_USER  = 200;
+IMPOSTORS_PER_USER = 200
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Legacy static evaluator (kept for comparability; prefer evaluate_hardened.py for paper metrics)."
+    )
+    parser.add_argument("dataset", help="Dataset folder name under datasets/<name>/npy/")
+    parser.add_argument("--checkpoint", default="model/checkpoint.weights.h5")
+    parser.add_argument("--seed", type=int, default=int(os.environ.get("TYPE2BRANCH_SEED", "42")))
+    return parser.parse_args()
 
-def print_help():
-    print("evaluate.py {dataset}");
-    exit(-1);
-    
 
-#
-# Verify command line parameters
-#
+args = parse_args()
+SEED = args.seed
+random.seed(SEED)
+np.random.seed(SEED)
+print(f"[Repro] Seed set to {SEED}")
 
-if len(sys.argv) != 2:
-    print_help();
-if not os.path.exists("datasets/" + sys.argv[1] + "/"):
-    print("ERROR!!! Dataset '" + sys.argv[1] + "' not found.");
-    print_help();
 
-DATASET = sys.argv[1];
+def configure_tf_runtime():
+    """Avoid TensorFlow grabbing all VRAM at startup in shared DGX nodes."""
+    try:
+        import tensorflow as tf
+        gpus = tf.config.list_physical_devices("GPU")
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except Exception as e:
+        print(f"[TF Runtime] Memory-growth setup warning: {e}")
+
+DATASET = args.dataset
+dataset_dir = os.path.join("datasets", DATASET)
+if not os.path.exists(dataset_dir):
+    print(f"ERROR!!! Dataset '{DATASET}' not found at {dataset_dir}.")
+    sys.exit(2)
 
 
 #
@@ -34,9 +54,16 @@ FOLDER_NPY = "datasets/" + DATASET + "/npy/";
 
 print("Loading dataset " + DATASET + "...");
 print("  Evaluation samples...");
-xe = np.load(FOLDER_NPY + "xt.npy", allow_pickle=True).item();
+xe = np.load(FOLDER_NPY + "xe.npy", allow_pickle=True).item();
+
+if len(xe) == 0:
+    print("ERROR: xe.npy is EMPTY (0 evaluation users).");
+    print("This means the dataset split produced no test users.");
+    print("Re-run ingest_aalto.py â€” the threshold has been lowered.");
+    sys.exit(1);
 
 print("  Verifying sample shapes...");
+print(f"  Found {len(xe)} evaluation users.");
 first_user = list(xe.keys())[0];
 first_sample_id = list(xe[first_user].keys())[0];
 first_sample = xe[first_user][first_sample_id];
@@ -48,7 +75,9 @@ INPUT_FEATURES = first_sample.shape[1];
 for user, samples in xe.items():
     for sample_id, arr in samples.items():
         if arr.shape != first_sample.shape:
-            print("ERROR!!! All samples must have the same shape (found " + str(arr.shape) + " in xt.npy).");
+            print("ERROR!!! All samples must have the same shape (found " + str(arr.shape) + " in xe.npy).");
+            print("        Offender user=" + str(user) + " sample=" + str(sample_id));
+            sys.exit(1);
 
 
 #
@@ -59,13 +88,20 @@ descriptor = {};
 descriptor["SEQUENCE_LENGTH"] = SEQUENCE_LENGTH;
 descriptor["INPUT_FEATURES"] = INPUT_FEATURES;
 
+configure_tf_runtime();
 import  model;
-descriptor = model.get_model_Type2Branch(descriptor);
+descriptor = model.get_model_Type2Branch(descriptor, build_optimizer=False);
 m = descriptor["model"];
 m.summary();
 
+checkpoint_path = args.checkpoint;
+if not os.path.exists(checkpoint_path):
+    print("ERROR!!! Missing model checkpoint at " + checkpoint_path);
+    print("        Train first: python train.py " + DATASET);
+    sys.exit(2);
+
 print("LOAD");
-m.load_weights("model/");
+m.load_weights(checkpoint_path);
 
 
 
@@ -82,11 +118,15 @@ for user_id, samples in xe.items():
     for sample_id, sample in samples.items():
         user_samples.append(sample);
 
-    user_samples = np.stack(user_samples);
+    user_samples = np.stack(user_samples).astype(np.float32, copy=False);
     yl = m.predict(user_samples, verbose=0);
     embeddings_by_user[user_id] = yl;
 
 print("");
+
+if len(embeddings_by_user) < 2:
+    print("ERROR!!! Need at least 2 evaluation users to compute impostor scores.");
+    sys.exit(1);
 
 
 
@@ -106,29 +146,22 @@ def calculate_score(gallery_samples, query_sample):
 
 
 def calculate_eer(legitimate_scores, impostor_scores):
-    ITERATIONS = 20;
+    """Calculate EER using linear sweep over thresholds for high precision."""
+    all_scores = sorted(legitimate_scores + impostor_scores);
+    best_thresh = 0.0;
+    best_diff = float('inf');
+    best_eer = 0.0;
 
-    mind = min(legitimate_scores[0], impostor_scores[0]);
-    maxd = max(legitimate_scores[-1], impostor_scores[-1]);
+    for thresh in np.linspace(min(all_scores), max(all_scores), 2000):
+        frr = np.mean([s > thresh for s in legitimate_scores]);
+        far = np.mean([s <= thresh for s in impostor_scores]);
+        diff = abs(frr - far);
+        if diff < best_diff:
+            best_diff = diff;
+            best_thresh = thresh;
+            best_eer = (frr + far) / 2.0;
 
-    threshold = (mind + maxd) / 2.0;
-    for i in range(0,ITERATIONS):
-        threshold = (mind + maxd) / 2.0;
-    
-        frr_count = len(legitimate_scores) - np.searchsorted(legitimate_scores, threshold, side = "left");
-        far_count = np.searchsorted(impostor_scores, threshold, side = "left");
-
-        frr = 100.0 * frr_count / len(legitimate_scores);
-        far = 100.0 * far_count / len(impostor_scores);
-
-        if frr == far:
-            break;
-        elif frr > far:
-            mind = threshold;
-        else:
-            maxd = threshold;
-
-    return (threshold, (far + frr)/2);
+    return (best_thresh, best_eer * 100.0);
 
 
 G = [1,2,5,7,10];
@@ -153,7 +186,8 @@ for user_id, yl in embeddings_by_user.items():
 
     yi = [];
     impostor_candidates = [candidate for candidate in embeddings_by_user.keys() if candidate != user_id];
-    impostors = random.sample(impostor_candidates, IMPOSTORS_PER_USER);
+    n_impostors = min(IMPOSTORS_PER_USER, len(impostor_candidates));
+    impostors = random.sample(impostor_candidates, n_impostors);
     for impostor in impostors:
         yi.append(random.choice(embeddings_by_user[impostor]));
 
@@ -197,3 +231,4 @@ print("----- AVERAGED PER USER AUTHENTICATION RESULTS");
 for g in G:
     eer = cumulative_sum[g] / cumulative_count[g];
     print("G=" + str(g) + "    EER=" + str(eer));
+

@@ -25,7 +25,67 @@ In 2021, the pioneering work on TypeNet showed that keystroke dynamics verificat
 
 ## Usage instructions
 
-Please consult the HOWTO.txt file.
+Use the commands below for end-to-end training, evaluation, and demo setup.
+
+Additional workspace notes for this branch (DGX workflow, pipeline map, research checklist):
+- [AGENT_MEMORY.md](AGENT_MEMORY.md)
+
+Hardened publication-style biometric evaluation (threshold tuned on `xv`, reported on held-out `xe`):
+- `python evaluate_hardened.py <dataset_name> --output-dir results_hardened`
+
+Continuous-authentication novelty evaluation (genuine->impostor and genuine->LLM switch sessions):
+- `python evaluate_continuous.py <dataset_name> --output-dir results_continuous`
+- Supports ablation toggles:
+  - `--disable-llm-gate` (biometric-only baseline)
+  - `--disable-biometric-gate` (LLM-only baseline)
+- Supports external assisted-input pool for non-synthetic LLM evaluation:
+  - `--llm-assisted-npy <path_to_samples.npy> --llm-assisted-max-samples 5000`
+- Supports explicit detector calibration threshold:
+  - `--llm-threshold 0.35`
+
+DGX preflight (recommended before long runs):
+- `python preflight_dgx.py <dataset_name> --require-gpu`
+
+Paper run manifest:
+- `python generate_manifest.py <dataset_name> --output paper_results_manifest.json`
+
+Continuous ablations and policy sensitivity:
+- `python run_continuous_ablations.py <dataset_name> --seeds 42,43,44,45`
+- Session sensitivity is controlled by `--session-settings 40:80,80:160`
+- Add `--include-sensitivity` for decision-window/alarm grid.
+
+Final policy selection (fixed ordered criteria + CI-overlap guard):
+- `python select_final_policy.py --ablation-json results_continuous/ablations/ablation_summary.json --hardened-json results_hardened/hardened_metrics.json --output-dir results_continuous/final_selection`
+
+Paper table bundle generation:
+- `python generate_paper_tables.py --hardened-json results_hardened/hardened_metrics.json --continuous-json results_continuous/continuous_metrics.json --ablation-json results_continuous/ablations/ablation_summary.json --selection-json results_continuous/final_selection/policy_selection.json --output-dir results_paper`
+
+Artifact validator:
+- `python validate_paper_outputs.py --hardened-dir results_hardened --continuous-dir results_continuous`
+
+Streamlit demo (persistent multi-user enrollment):
+- `streamlit run app.py`
+- Enrollments persist at `artifacts/enrollments.json`.
+- Use [DEMO_RUNBOOK.md](DEMO_RUNBOOK.md) for viva-ready launch/tunnel flow and fallbacks.
+- Optional path overrides if files live elsewhere:
+  - `TYPE2BRANCH_CHECKPOINT_PATH=/abs/path/checkpoint.weights.h5`
+  - `TYPE2BRANCH_THRESHOLD_ARTIFACT=/abs/path/threshold_artifact.json`
+
+End-to-end DGX pipeline:
+- `bash run_pipeline.sh 2>&1 | tee pipeline_$(date +%F_%H-%M-%S).log`
+- Raw dataset zip is now expected at `data/raw/Keystrokes.zip` (legacy root path still supported).
+- Set `RUN_CONTINUOUS_EVAL=0` to skip continuous evaluation.
+- Optional continuous LLM controls:
+  - `CONT_LLM_THRESHOLD=0.35`
+  - `CONT_LLM_ASSISTED_NPY=/path/to/assisted.npy`
+  - `CONT_LLM_ASSISTED_MAX_SAMPLES=5000`
+- Set `RUN_CONTINUOUS_ABLATIONS=1` to run baseline/ablation suite.
+- Set `RUN_CONTINUOUS_SENSITIVITY=1` together with `RUN_CONTINUOUS_ABLATIONS=1` for policy grid.
+- Set `ABLATION_SESSION_SETTINGS=40:80,80:160` (or custom warmup:attack list) for session-length analysis.
+- Set `RUN_MANIFEST=0` to skip `paper_results_manifest.json`.
+
+Novelty planning document:
+- [NOVELTY_PLAN_CONTINUOUS_LLM_IEEE.md](NOVELTY_PLAN_CONTINUOUS_LLM_IEEE.md)
 
 
 ## Links

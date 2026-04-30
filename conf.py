@@ -2,7 +2,9 @@
 N = 15;
 
 # Number of sets per batch
-K = 10;
+# Paper: K=40 on A100 40GB. H200 has 80GB+, so K=40 fits comfortably.
+# Fig. 5 in paper shows larger K → lower EER.
+K = 40;
 
 #
 # CURRICULUM_DELAY
@@ -22,7 +24,7 @@ K = 10;
 #       EPOCH 20-29 - 2 nearest neighbour, K - 2 random 
 #       etc.
 
-CURRICULUM_DELAY = 20;
+CURRICULUM_DELAY = 5;   # Reduced: with K=40 we have more classes per batch, so curriculum ramps faster
 
 #
 # CURRICULUM_MAX_NEIGHBOURS
@@ -38,7 +40,7 @@ CURRICULUM_DELAY = 20;
 #       EPOCH 3 - 2 nearest neighbour, K - 2 random (hit CURRICULUM_MAX_NEIGHBOURS = 2 limitation)
 #       EPOCH 4 - 2 nearest neighbour, K - 2 random (hit CURRICULUM_MAX_NEIGHBOURS = 2 limitation)
 
-CURRICULUM_MAX_NEIGHBOURS = 4;
+CURRICULUM_MAX_NEIGHBOURS = 19;  # Paper: optimal ≈ (K-2)/2 = (40-2)/2 = 19
 
 #
 # Model hyperparameters
@@ -47,11 +49,12 @@ CURRICULUM_MAX_NEIGHBOURS = 4;
 #     MODEL_WIDTH   - Uniform width of the recurrent layers. If you prefer to fine-tune the width of each recurrent layer, you will have to change model.py.
 #     MODEL_FILTERS - Number of filters in the first convolutional layer; the other two have 2 * MODEL_FILTERS and 4 * MODEL_FILTERS. If you prefer [..., etc.]
 
-MODEL_DROPOUT = 0.5;
-MODEL_WIDTH   = 256;
-MODEL_FILTERS = 128;
+MODEL_DROPOUT = 0.3;
+MODEL_WIDTH   = 512;   # Full model — matches local checkpoint.weights.h5
+MODEL_FILTERS = 256;   # Full model — matches local checkpoint.weights.h5
  
 # Set2Set loss hyperparameter
+# Paper Fig. 6: β=0.05 is optimal. Higher values crush embedding space.
 BETA = 0.05;
 
 #
@@ -65,7 +68,7 @@ BETA = 0.05;
 #
 #   should be near optimal, but this needs to be determined empirically.
 
-TRAINING_STEPS   = 100;
+TRAINING_STEPS   = 5000;  # Fast run: 5,000 steps (was 20000)
 
 #
 # The datasets generated with the generate_dataset.py script included here always have 1000 validation users. Thus, VALIDATION_STEPS should be
@@ -74,14 +77,14 @@ TRAINING_STEPS   = 100;
 #
 # If you build training/validation datasets yourself, replace the 1000 value in the equation above with the number of validation users.
 
-VALIDATION_STEPS = 100;
+VALIDATION_STEPS = 25;   # floor(val_users / K). Adjusted for K=40.
 
 #
 # Training termination
 #   EPOCHS - Maximum number of training epochs.
 #   EARLY_STOP_PATIENCE - Maximum number of epoch without val_loss improvement.
 
-EPOCHS = 600;
+EPOCHS = 8000;
 
-EARLY_STOP_THRESHOLD = 1.0;
-EARLY_STOP_PATIENCE  = 40;
+EARLY_STOP_THRESHOLD = 0.8; # Stricter threshold
+EARLY_STOP_PATIENCE  = 5;  # Fast run: patience=5 (was 12)

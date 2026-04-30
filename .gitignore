@@ -1,13 +1,19 @@
 
 *.csv
-*.rar
+*.log
 *.npy
+*.rar
+*.zip
+
 /model
 /raw
-__pycache__/conf.cpython-310.pyc
-__pycache__/loss.cpython-310.pyc
-__pycache__/model.cpython-310.pyc
-__pycache__/training_generator.cpython-310.pyc
-__pycache__/util.cpython-310.pyc
-__pycache__/validation_generator.cpython-310.pyc
-LOSS.png
+/results
+/results_*
+/paper_results_manifest.json
+/LOSS.png
+/artifacts/
+
+__pycache__/
+*.py[cod]
+/data/
+/datasets/

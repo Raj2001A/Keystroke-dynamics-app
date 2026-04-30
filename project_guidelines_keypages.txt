@@ -1,0 +1,880 @@
+
+
+===== PAGE 7 =====
+7 
+ 
+ 
+SYNOPSIS FORMAT 
+Project Group No: 
+Register No:       Name:  
+1.          Write Full Name as per records 
+2.  
+3.  
+Project Title: Project Title to be Typed Using Title Case 
+Name of the Guide: Name of the guide with affiliation  
+Abstract 
+Use this template to prepare the synopsis of the project report . Present here the broad outline 
+of the work that you carried out / focus of the mini project / semester project. These can also 
+include but not restricted to literature survey, objectives identified, experimental and/or 
+modelling methodology adopted, outl ine of experiments carried out / summary of important 
+results and so on. No need for add any figure or table in this document. No references are 
+required.  Use Times New Roman, 12 pt, 1.5” spacing, justify alignment. Maximum no. of 
+words for abstract is 60 0 and should not exceed ONE A4 sheet. Type the outline as single 
+paragraph. Kindly stick to the format given for submission of synopsis. After the second 
+review meeting, get the signature of the guide and submit the hardcopy to project coordinator. 
+In case of group project each student shall submit an individual synopsis and the synopsis 
+will additionally include the following  
+Specific Contribution  
+ *************** 
+Specific Learning  
+ *************** 
+Technical Limitations & Ethical Challenges faced  
+ *************** 
+Keywords: Enter 3 – 5 key words that describe your work – Use Times New Roman, 10 pt, Italics  
+ 
+Signature of the Student     Signature of Guide  
+Date: 
+
+===== PAGE 8 =====
+8 
+ 
+GUIDELINES TO PREPARE PROJECT REPORT 
+ 
+PARTS OF PROJECT REPORT 
+ 
+ 
+1.  Cover page Refer Page 18. Format must be adhered to. 
+2.  Inside cover page Same as cover Page 
+3.  Bonafide Certificate Refer Page 20.  Format must be adhered to.  
+4.  Declaration by Student Refer Page 21 
+5.  Certificate (if any, from 
+Industries or other 
+organisations) 
+ 
+6.  Acknowledgements (Not 
+mandatory) 
+Not to exceed one page 
+ 
+7.  Abstract Maximum of 300 words and should contain no more 
+than six key words.  
+Refer Page 26 
+8.  Table of contents Refer Page 23 
+9.  List of Figures Refer Page 24 
+10.  List of Tables Refer Page 25 
+11.  Abbreviations (if any) Refer Page 15 
+12.  Notation (if any) Refer Page 16 
+13.  Chapters Refer Page 27 
+14.  Appendices Same format as Chapters 
+15.  References Refer Page 29 
+* Number of report copies to 
+be submitted (soft copies) 
+One project report copy to be upload in project 
+portal by any one the team member and synopsis to 
+be uploaded by all the members in a team 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 9 =====
+9 
+ 
+ 
+STYLE NOTES FOR PROJECT REPORT PREPARATION 
+ 
+ 
+ 
+Numbering 
+ 
+ Pages 
+ 
+ Every page in the Project report, except the title page, must be accounted for the page 
+numbering, starting from acknowledgements and till the beginning of the introductory 
+chapter, should be printed in small Roman numbers, i.e., i, ii, iii, iv, etc.,  
+  
+ All printed page numbers should be located at the bottom centre of the page, 17 mm 
+(2/3”) from the bottom edge, using normal print.  
+ 
+ Chapter  
+ 
+ Use only Arabic numerals. Chapter numbering should be centre on the top of the page 
+using large bold print. 
+  
+ Example:   CHAPTER 1 
+ 
+ Sections 
+ 
+ Use only Arabic numerals with decimals. Section numbering sho uld be left justified 
+using bold print. 
+ 
+ Example:  
+ 1.1, 1.2, 1.3, etc. 
+ 
+ 
+Equation(s)/ Formula(e) 
+ 
+Use only Arabic numerals  with single decimal. Equation numbers should be right 
+justified using normal print. Mathematical symbols should be printed in italics. 
+ 
+Format: (<Chapter number>.<Equation serial number) 
+ 
+Example:  
+ 
+2cot cos 22
+3
+ec  
+
+             
+
+
+              (1.1) 
+ 
+ 
+
+===== PAGE 10 =====
+10 
+ 
+1
+0
+f
+dC
+
+ 
+         (1.2) 
+ 
+1
+1
+0
+2 2 ( )( ) (2 1) (2 1)3 3 1
+f n
+f
+f z
+kId n
+
+    
+
+    
+             (1.3) 
+ 
+Please note that the equation numbers are flush right in normal print. 
+ 
+ 
+TEXT 
+ 
+ Colour: Black print 
+ Font: 
+ 
+Regular text - Times New Roman 12 pts., and normal print. 
+CHAPTER 
+HEADINGS 
+Time New Roman 14 pts. And bold print and all 
+capitals. 
+SECTION 
+HEADINGS 
+Time New Roman 12 pts. And bold print and all 
+capitals. 
+Subsection Headings Time New Roman 12 pts. And bold print and 
+leading capitals, i.e., only first letter in each word 
+to be the capital. 
+Special Text Italics/Superscript/Subscript/Special symbol, etc, 
+as per necessity. Special text may include 
+footnotes, endnotes, physical or chemical 
+symbols, mathematical notations, etc. 
+ 
+References Same font as regular text. Serial number and all 
+authors names to be in bold print. Journal names 
+and book titles in italics. For format see Annexure 
+9. 
+   
+ 
+Spacing: 
+ 
+ 
+Use 1.15 spacing between the lines. 
+Use  a single blank line between paragraphs. 
+ 
+All paragraphs in the project report should be justified from the 
+first line the last line. 
+ 
+Use double spacing between the regular text and quotations. 
+   
+  
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 11 =====
+11 
+ 
+Provide one blank line between: 
+ 
+(a) Chapter title and first sentence of a Chapter. 
+ 
+Use single line spacing: 
+ 
+(a) In footnotes and endnotes for text, 
+(b) In explanatory notes for tables and figures. 
+(c) In text corresponding to bullets, listings, and quotations in the main body of the 
+thesis. 
+ 
+Use single space in references and double space between references. 
+ 
+Justification: The text should be fully justified. 
+ 
+  Hyphenation should be avoided as far as possible. 
+ 
+  Text corresponding to bullets and listings should be indented. 
+ 
+Quotations from other research work must be indented on the left and the right 
+if they are longer than two lines. Shorter quotations can be included as a part 
+of the regular text. 
+ 
+Windows &  
+Orphans: 
+ 
+At the bottom of a page, a paragraph should have atlea st two lines. 
+Similarly, at the top of a page, a paragraph should end with atleast two 
+lines. 
+ 
+MARGINS 
+ 
+ The margins for the regular text are as follows: 
+ 
+  LEFT  = 1.25” 
+  RIGHT = 1” 
+  TOP  = 1” 
+  BOTTOM = 1” 
+ 
+Please note that the bottom of the page numb ers should be 17 mm above the bottom edge of 
+the numbered pages. 
+ 
+TABLES 
+ 
+ A sample for tables is provided in page 27 
+  
+ All tables should have sharp lines, drawn in black to separate rows/columns as and 
+when necessary. 
+ 
+ Tables should follow immediately a fter they are referred to for the first time in the 
+text. Splitting of paragraphs, to include tables on a page, should be avoided. Provide three 
+spaces on the top and the bottom of all tables to separate them from the regular text, 
+wherever applicable.  
+
+===== PAGE 12 =====
+12 
+ 
+ 
+ The last line of the title of any table should be 10 mm to 15 mm above the top-most 
+horizontal line of the table , and the title should be centered concerning the table. The titles 
+must be in the same font as the regular text and should be single -spaced. The title format is 
+given below: 
+ 
+ Table<blank><chapter number>.<serial number><left indent><table title>. 
+ 
+Example (of a small table which is sought to be placed within the text): 
+ 
+ Table 1.1 Results of the simulation experiment. 
+ 
+  
+ 
+ 
+ 
+ 
+Whenever a table ex ceeds one-page present the full title of the table on the first page and on 
+the following pages, provide the table number and state “(cond.)” after it. 
+ 
+Example: (notice the left justification) 
+ 
+Table 1.2 (contd.) 
+ 
+Wherever explanatory notes are used for c larifying any information presented in the tables, 
+print them after leaving a single space immediately below the tables. 
+ 
+All tables in landscape format must be placed such that their top portions are near the binding 
+of the thesis and their bottom portions near the outer edge. 
+ 
+FIGURES 
+ 
+ Sample figure is shown in page 28  
+ 
+All figures, drawings, and graphs should be drawn in black with sharp lines and 
+adequate contrast between different plots if more than one plot is present in the same graph. 
+ 
+ Figures should follow immediately after they are referred to for the first time in the 
+text. Splitting of paragraphs, to include figures on a page, should be avoided. Provide three 
+spaces on the top and the bottom of all figures to separate them from the regular tex t, 
+wherever applicable. 
+ 
+ The first line of the title for figures, drawings, graphs and photos should be between 
+10 mm and 15 mm below the bottom, and they should be centred concerning the figure. The 
+titles must be in the same font as the regular text and  should be single -spaced. The title 
+format is given below: 
+ 
+ Fig.<blank><chapter number><serial number><left indent><figure title>. 
+ 
+ 
+ 
+The contents of the table will be within the surrounding double line 
+(which indicates the top-most, left-most, right-most, and bottom-most 
+boundaries of the table) 
+
+===== PAGE 13 =====
+13 
+ 
+Example: 
+ 
+Fig. 1.1.Stability of the Neuroprosthetics. 
+    
+Wherever a figure exceeds one page (as in the case of large flo w charts for computer 
+programmes) present the full title of the figure on the first page and in the following pages 
+provide the figure number and state “(contd.)” after it. 
+ 
+Example: (notice the left justification) 
+ 
+Fig.1.1 (contd.) 
+ 
+When there are many plots in a single graph or figure, the lettering, labelling or numbering of 
+each plot for its identification should be of a size such that even after size reduction in the 
+report, the identification should be legible. 
+ 
+All Figures in landscape format must be  placed such that their top portions are near the 
+binding of the report and their bottom portions near the outer edge. 
+ 
+PHOTOS 
+ 
+Use Colour photos only if they are necessary. Remember that the report may have to be 
+photocopied. In case Colour photos are used, all copies of the report must contain only colour 
+photos. 
+ 
+Photos may be printed on glossy paper, and be mounted with white case  in (e.g., Elmer’s 
+glue), glue stick, dry mounting tissue, or any good adhesive. Do not use rubber cement or 
+cello tape. 
+ 
+Each photo should be numbered and referred to as a figure. Photo titles should be similar to 
+those provided for figures. 
+ 
+DRAWINGS 
+ 
+Drawings which are larger than A4 size are not encouraged. If larger drawings are absolutely 
+necessary they may be suitably folded to A4 size in the report.  
+ 
+Each drawing should be numbered and referred to as a figure. Drawing titles should be 
+similar to those provided for figures. 
+ 
+FOOTNOTES 
+ 
+In presenting footnotes and references, use a consistent form acceptable in your discip line. 
+  
+ 
+PUNCTUATION 
+  Please refer to any standard style manual such as the Chicago Manual of Style1, where 
+rules of punctuation are clarified. Student must note that different styles are in practice these 
+days. 
+                                                 
+1 Chicago Manual of Style, Prentice Hall of India, New Delhi, 1989 
+
+===== PAGE 14 =====
+14 
+ 
+ 
+ For example, some people insert a full st op before ending a sentence in double 
+ quotes, whereas other inserts the full stop after the double quotes. Both styles are in 
+practice. 
+ 
+ 
+ 
+ 
+ 
+STATISTICAL ANALYSIS 
+ 
+Statistical methods used to analyse the data should be clearly mentioned in the methodology 
+section. Meaning of symbols used in the graphs should be clearly explained in the legends for 
+figures and graphs. 
+ 
+ 
+APPENDICES 
+ 
+If the project requires clearances from competent authorities such as Institutional ethics 
+committee (IEC), Institutional Biosaf ety Committee (IBC), etc., a copy of the approval 
+letter/s should be appended in the appendix. 
+ 
+REFERENCES 
+References should be arranged in a lphabetical order of surname or last name of the 
+first author. 
+ 
+Two or more references by same author(s) in the sam e year should be indicated by 
+small case alphabets in italics. 
+ 
+For papers by one author: 
+Bensamaia SJ (2015) Biological and bionic hand: natural neural coding and artificial 
+perception. Philosophical Transactions of the Royal Society London B Biological 
+Sciences, 19, 370-375. 
+ 
+For papers by two authors: 
+Ghafoor U, Kim S and Hong KS (2017) Selectivity and longevity of peripheral nerve and 
+machine interfaces: A review. Frontiers in Neurorobotics, 11, 59-63. 
+ 
+For papers by more than two authors: 
+Knutson JS, Fu MJ, Sheffler LR and Chae J (2015) Neuromuscular electrical stimulation 
+for motor restoration in hemiplegia. Physical Medicine and Rehabilitation Clinics of 
+North America, 26 (4), 729-745. 
+ 
+Adewole DO, Serruya MD, Harris TP, Burrell JC, Petrov D, Chen HI, Wolf JA and 
+Cullen DK (2016) The evolution of neuroprosthetic interfaces. Critical Reviews in 
+Biomedical Engineering, 44, 123-152. 
+ 
+Note: Indicate the names of all authors, if feasible, and avoid the use of et al (to 
+indicate the presence of two or more co-authors) after the first author’s name. 
+                                                                                                                                                        
+ 
+
+===== PAGE 18 =====
+18 
+ 
+ 
+TITLE OF THE PROJECT 
+(14 POINTS, BOLD, TIMES NEW ROMAN,1.5 LINE SPACE) 
+ 
+ 
+ 
+ 
+ 
+Report submitted to the SASTRA Deemed to be University  
+in partial fulfillment of the requirements 
+for the award of the degree of 
+ 
+ 
+Master of Technology/Master of Computer Applications 
+ 
+ 
+ 
+ 
+Submitted by 
+ 
+NAME (12 POINTS, BOLD, TIMES NEW ROMAN) 
+(Reg. No.: XXXXXXXXX, Programme) 
+ 
+ 
+ 
+ 
+ 
+May 2026 
+ 
+ 
+ 
+ 
+SCHOOL OF COMPUTING 
+THANJAVUR, TAMIL NADU, INDIA – 613 401 
+ 
+ 
+
+===== PAGE 19 =====
+19 
+ 
+ 
+ 
+SCHOOL OF COMPUTING 
+THANJAVUR – 613 401 
+ 
+ 
+ 
+Bonafide Certificate  
+ 
+This is to certify that the project report  titled “ Project Title  (Title Case – First 
+Letter Caps)” submitted in partial fulfillment of the requirements for the award of the degree 
+of M. Tech. Computer Science and Engineering / M.Tech. Embedded Systems / M.Tech. 
+Cyber Security/ Master of Computer Application s to the SASTRA Deemed to be University, 
+is a bona -fide record of the work done by Mr./Ms. AB(Reg. No. 12345678 9) (all members 
+name with register no in bracket if applicable ) during the final semester of the academic year 
+2025-26, in the School of Computing, under my supervision. This report has not formed the 
+basis for the award of any degree, diploma, associateship , fellowship or other similar title to 
+any candidate of any University.  
+ 
+Signature of Project Supervisor :  
+Name with Affiliation   :  
+Date     : 
+ 
+Project Viva voce held on ________________ 
+ 
+ 
+ 
+Examiner 1        Examiner 2 
+
+===== PAGE 20 =====
+20 
+ 
+ 
+ 
+ 
+ 
+SCHOOL OF COMPUTING 
+THANJAVUR – 613 401 
+ 
+ 
+ 
+Declaration 
+ 
+I declare that the project report  titled “ Project Title  (Title Case – First Letter 
+Caps)” submitted by me is an original work done by me under the guidance of Dr. Xyzzzzzz, 
+Designation, School of C omputing, SASTRA Deemed to be University during the final 
+semester of the academic year 20 25-26, in the School of C omputing. The work is original 
+and wherever I have  used materials from other sources, I have  given due credit and  cited 
+them in the text of the report. This report has not  formed the basis for the award of any 
+degree, diploma, associate -ship, fellowship or other similar title to any candidate of any 
+University.  
+ 
+Signature of the candidate(s) :  
+ 
+Name of the candidate(s)  :  
+Date     : 
+ 
+ 
+ 
+ 
+
+===== PAGE 21 =====
+21 
+ 
+ 
+Acknowledgements (Sample) 
+I/We would like to thank our Honorable Chancellor  Prof. R. Sethuraman  for 
+providing me/us with an opportunity and the necessary infrastructure for carrying out this 
+project as a part of our curriculum.  
+I/We would like to thank our Honorable Vice -Chancellor Dr. S. 
+Vaidhyasubramaniam and Dr. S. Swaminathan,  Dean, Planning & Development, for the 
+encouragement and strategic support at every step of our college life. 
+I/We extend my/our sincere thanks to Dr. R. Chandramouli , Registrar, SASTRA 
+Deemed to be University for providing the opportunity to pursue this project. 
+I/We extend my/our heartfelt thanks to Dr. V. S. Shankar Sriram , Dean, School of 
+Computing, Dr. R. Muthaiah , Associate Dean, Research, Dr. K.Ramkumar, Associate 
+Dean, Academics, Dr. D. Manivannan , Associ ate Dean, Infrastructure, Dr. R. 
+Alageswaran, Associate Dean, Students Welfare. 
+My/Our guide <Guidename>, <Designation>, School of Computing was the driving 
+force behind this whole idea from the start. His/Her deep insight in the field and invaluable 
+suggestions helped me/us in making progress throughout our project work. I/We also thank 
+the project review panel members for their valuable comments and insights which made this 
+project better. 
+I/We would like to extend our gratitude to all the teaching and no n-teaching faculties 
+of the School of Computing who have either directly or indirectly helped us in the completion 
+of the project. 
+I/We gratefully acknowledge all the contributions and encouragement from my family 
+and friends resulting in the successful co mpletion of this project . I/We  thank you all for 
+providing me an opportunity to showcase my skills through project. 
+. 
+ 
+
+===== PAGE 22 =====
+22 
+ 
+ 
+Table of Contents 
+Title           Page No. 
+Bona-fide Certificate         ii 
+Declaration          iii 
+Certificate (if any) for external projects       iv 
+Acknowledgements         v 
+List of Figures          vi 
+List of Tables          vii 
+Abstract          viii 
+1. Introduction 
+1.1. *******         1 
+1.2. *******         2 
+1.3. *******         3 
+1.4. *******         4 
+1.5. *******         5 
+1.6. Motivation          5 
+2. Objectives          7  
+3. Experimental Work / Methodology 
+3.1. *******         8 
+3.2. *******         8 
+3.3. *******         8 
+4. Results and Discussion 
+4.1. Effect of *******        9  
+4.2. Effect of *******        16 
+4.3. *******         17 
+5. Conclusions and Further Work       19 
+6. References          21 
+7. Appendix           23 
+7.1 Similarity Check Report   
+7.2 Sample Source code         
+    
+ 
+
+===== PAGE 23 =====
+23 
+ 
+ 
+List of Figures 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Figure No. Title Page No. 
+   
+   
+   
+   
+   
+   
+
+===== PAGE 24 =====
+24 
+ 
+ 
+List of Tables  
+ 
+ 
+Table No. Table name Page No. 
+1.1 Efficiency Tables 27 
+1.2 Efficiency of devices in rodents 28 
+1.3 Efficiency of devices in monkeys 29 
+ 
+
+===== PAGE 25 =====
+25 
+ 
+ 
+Abstract 
+ 
+The body should be justified and typed in Times New Roman, 12 pt, not bold, with 1.5 line 
+spacing and should be one page .  The abstract should contain a brief background including 
+the literature survey that leads to the research question/objective , methodology and the major 
+results with overall conclusions.  
+For a team project, each member of the team shall write the abstract in his/her own words. 
+Abstract shall  also explicitly state in bullet format the specific contribution and specific 
+learning by each individual .  Project thesis / report shall have abstract of all the team 
+members.  
+ 
+Specific Contribution  
+ *************** 
+ *************** 
+ *************** 
+Specific Learning  
+ *************** 
+ *************** 
+ *************** 
+ 
+ 
+  
+ 
+ 
+
+===== PAGE 26 =====
+26 
+ 
+ 
+CHAPTER 1  
+ 
+INTRODUCTION 
+ 
+Neuroprosthetic devices are in great demand worldwide. Quality of life for patients suffering 
+from neurodegenerative diseases, stroke, brain and spinal cord inj uries and limb amputees 
+can be dramatically improved by suitable neuroprosthetic devices. However, there are several 
+challenges that need to be overcome before such devices can be a reality. To be able to design 
+neuroprosthetic devices a multidisciplinary approach involving expertise from basic 
+neuroscience, physiology, medicine, engineering and material sciences will be required. 
+Hence it is imperative that more and more laboratories across the world should focus their 
+efforts to resolve these hurdles and develop neuroprosthetics. 
+Several approaches have been taken towards the development of neuroprosthetics suitable for 
+specific purpose. Neuromuscular electrical stimulation (NMES) has been used for direct 
+stimulation of muscles in patients having upper mot or neuron injuries due to stroke or spinal 
+cord damage (Knutson et al. 2015). Peripheral nerve interfaces (PNIs) are being developed 
+for upper-limb amputees (Ghafoor et al. 2017). Intracortical microstimulation (ICMS) is used 
+to provide artificial stimulat ion to the primary somatosensory cortex that mimics the 
+sensation of touch and proprioception ( Bensmaia 2015, Tabot et al . 2015). Cortical Brain 
+Machine Interfaces (BMIs) help paralyzed subjects to control a robotic arm or wheel chair 
+(Andersen et al. 2014, Slutzky and Flint 2017 ). These devices are summarized in table 1.1 
+below. 
+Table 1.1 Neuroprosthetic devices and their applications 
+Neuroprosthetics NMES PNIs ICMS BMIs 
+Application Upper motor 
+neuron injuries 
+Upper limb 
+amputees 
+Peripheral nerve 
+injuries Paralysis 
+ 
+NMES, neuromuscular electrical stimulation; PNIs, peripheral nerve interfaces; ICMS, 
+intracortical microstimulation; BMIs, brain machine interfaces 
+ 
+Neuroprosthetic interfaces have been designed to facilitate communication between the 
+nervous system (central or peripheral) and a prosthetic device such as a robotic arm or leg 
+(Adewole et al . 2016). The design of a neuroprosthetic interface depends on its specific 
+application. However, some of the desired characteristics that all neuroprosthetic interfaces 
+must possess are biocompatibility, high resolution/selectivity and long -term 
+reliability/stability (Adewole et al. 2016). In addition, these devices must be affordable for 
+people belonging to poor economic background. 
+Biocompatibility can be tested in preclinical studies using rodents and monkeys. Cost of these 
+devices can be greatly reduced by using material that is locally available rather than 
+importing them from other countries. Also, one needs to test these devices in the local 
+settings to c heck the effect of different weather conditions and the specific application for 
+which these devices will be used.  
+
+===== PAGE 27 =====
+27 
+ 
+In the present study we have designed neuroprosthetic for patients suffering from peripheral 
+nerve injuries using material available locally . We also tested these devices in rats and 
+monkeys for any immunological reactions, tissue injuries and discomfort. Our preliminary 
+results suggest that these devices can be used for manipulating robotic arms or prosthetic 
+limbs without any obvious discomf ort to the subject for at least six months. At the end of six 
+months, the efficiency of these devices is as good as at the beginning of the experiments. 
+Results from one of our tests are shown in Fig. 1.1 below. Further studies to test these devices 
+in clinical settings need to be carried out to examine their suitability for human subjects. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Fig. 1.1 Stability of the neuroprosthetics 
+ 
+ 
+
+
+===== PAGE 28 =====
+28 
+ 
+ 
+REFERENCES 
+Adewole DO, Serruya MD, Harris TP, Burrell JC, Petrov D, Chen HI, Wolf JA and Cullen DK 
+(2016) The evolution of neuroprosthetic interfaces. Critical Reviews in Biomedical 
+Engineering, 44, 123-152. 
+Andersen RA, Kellis S, Klaes C and Aflao T (2014) Toward more versatile and intuitive cortical 
+brain-machine interfaces. Current Biology, 24, R885-R897. 
+Bensmaia SJ (2015) Biological and bionic hand: natural neural coding and artificial perception. 
+Philosophical Transactions of the Royal Society London B Biological Sciences , 19, 370 
+(1677). 
+Ghafoor U, Kim S and Hong KS  (2017) Selectivity and longevity of p eripheral nerve and 
+machine interfaces: A review. Frontiers in Neurorobotics, 11, 59. 
+Knutson JS, Fu MJ, Sheffler LR and Chae J  (2015) Neuromuscular electrical stimulation for 
+motor restoration in hemiplegia. Physical Medicine and Rehabilitation Clinics of  North 
+America, 26 (4), 729-745. 
+Sanchez JC (2016) Neuroprosthetics: Principles and Applications. CRC Press (USA). 
+Slutzky MW and Flint RD (2017) Physiological properties of brain -machine interface input 
+signals. Journal of Neurophysiology, 118, 1329-1343. 
+Tabot GA, Kim SS, Winberry JE and Bensmaia SJ (2015) Restoring tactile and proprioceptive 
+sensation through a brain interface. Neurobiology of Disease, 83, 191-198. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 29 =====
+29 
+ 
+ 
+Annexure – I 
+ 
+Assessment scheme and the rubrics for award of marks 
+ 
+Review - 1:  30 Marks 
+ 
+I. Problem formulation/ Objective & Motivation/ Literature review or survey 
+(Maximum marks: 10) 
+ Marks 
+(a) Problem statement (5 marks)  
+Clear definition and formulation of a problem statement  4-5 
+Fair definition and formulation of a problem statement 2-3 
+Poor/ill-defined problem statement 0-1 
+(b) Literature survey (5 marks)  
+Exhaustive literature survey relevant to the problem  4-5 
+Satisfactory literature survey relevant to the problem  2-3 
+Inadequate literature survey  0-1 
+II. Methodology/Work plan (Maximum marks: 10) 
+Detailed, well-defined, methodology/ work plan  8-10 
+Partial/incomplete methodology/ work plan  4-7 
+Ill-defined or unrealistic work plan  0-3 
+III. Work carried out (Maximum marks: 10) 
+Clear evidence of work done in terms of carrying out 
+analysis/fabrication/case studies/any other appropriate activity  
+8-10 
+Some work has been carried out  4-7 
+Very limited/no work has been carried out 0-3 
+ 
+Review - 2:  30 Marks 
+ 
+IV. Problem formulation/ Objective & Motivation/ Literature review or survey 
+(Maximum marks: 10) 
+ Marks 
+(a) Implementation of methodology (4 marks)  
+Systematic implementation  4 
+Satisfactory implementation 2-3 
+Poor implementation 0-1 
+(b) Results (4 marks) 
+Excellent presentation of data in terms of graphs, figures, tables & strict 
+adherence to norms  
+4 
+Satisfactory presentation of data in terms of graphs, figures, tables & 
+adherence to norms 
+2-3 
+Poor presentation of data & adherence to norms 0-1 
+(c) Adherence to codes, standards & ethical practices (2 marks)  
+Full conformity 2 
+Partial conformity 1 
+Non-conformity 0 
+V. Interpretation/Understanding, Discussion & Conclusion(s) 
+(Maximum marks: 20) 

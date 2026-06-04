@@ -15,13 +15,15 @@ import detect_llm_paste
 st.set_page_config(
     page_title="Type2Branch | Deep Biometrics",
     layout="wide",
-    page_icon="K",
+    page_icon="🔐",
 )
 
 st.markdown("""
 <style>
     /* Ultra-Premium Glassmorphic Cybersecurity Theme */
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Outfit', sans-serif;
@@ -134,6 +136,85 @@ st.markdown("""
         border-color: #00f0ff !important;
         box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2) !important;
     }
+
+    /* JetBrains Mono for code/payload areas */
+    code, pre, .ksr-mono {
+        font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: rgba(5, 10, 30, 0.9) !important;
+        border-right: 1px solid rgba(0, 240, 255, 0.08) !important;
+    }
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] label {
+        color: #94a3b8 !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Primary button glow */
+    .stButton button[kind="primary"],
+    button[data-testid="stFormSubmitButton"] {
+        background: linear-gradient(135deg, #0ea5e9 0%, #00f0ff 100%) !important;
+        color: #020617 !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.25) !important;
+        transition: all 0.25s ease !important;
+        letter-spacing: 0.5px !important;
+    }
+    .stButton button[kind="primary"]:hover,
+    button[data-testid="stFormSubmitButton"]:hover {
+        box-shadow: 0 0 35px rgba(0, 240, 255, 0.45) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Selectbox */
+    [data-testid="stSelectbox"] > div > div {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+        border-radius: 8px !important;
+        color: #f8fafc !important;
+    }
+
+    /* Expander */
+    [data-testid="stExpander"] {
+        background: rgba(15, 23, 42, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 10px !important;
+    }
+
+    /* Divider */
+    hr {
+        border-color: rgba(255, 255, 255, 0.06) !important;
+    }
+
+    /* Alert / warning boxes */
+    .stAlert {
+        border-radius: 10px !important;
+    }
+
+    /* Success banner */
+    [data-testid="stSuccess"] {
+        background: rgba(16, 185, 129, 0.1) !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        border-radius: 12px !important;
+    }
+
+    /* Error banner */
+    [data-testid="stError"] {
+        background: rgba(239, 68, 68, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        border-radius: 12px !important;
+    }
+
+    /* Table styling for leaderboard */
+    [data-testid="stDataFrame"] {
+        border-radius: 12px !important;
+        overflow: hidden !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -142,10 +223,27 @@ ENROLLMENTS_PATH = os.path.join(BASE_DIR, "artifacts", "enrollments.json")
 CHECKPOINT_PATH  = os.path.join(BASE_DIR, "model", "checkpoint.weights.h5")
 os.environ.setdefault("TF_FORCE_GPU_ALLOW_GROWTH", "true")
 
-PROMPT_TEXT = (
-    "The quick brown fox jumps over the lazy dog. "
-    "Cybersecurity relies on evaluating behavioral metrics directly."
-)
+# ─── Production Config ──────────────────────────────────────────────────────
+MIN_ENROLLMENT_TEMPLATES = 15         # Minimum templates before auth is enabled
+ROLLING_GALLERY_MAX      = 20         # Max stored embeddings per user
+PERSONAL_THRESHOLD_PERCENTILE = 90    # p90 of genuine distances as base threshold
+THRESHOLD_SAFETY_MARGIN  = 1.00       # × multiplier on top of p90 (0% buffer)
+MAX_CONSEC_FAILS_STEPUP  = 2          # Soft anomalies before step-up challenge
+MAX_CONSEC_FAILS_LOCKOUT = 4          # Hard anomalies before lockout
+
+# Challenge phrase pool — rotated per session (anti-replay)
+CHALLENGE_PHRASES = [
+    "The quick brown fox jumps over the lazy dog. Cybersecurity relies on evaluating behavioral metrics directly.",
+    "Authentication systems must validate identity through multiple layers of behavioral analysis.",
+    "Keystroke dynamics capture the unique rhythm and timing patterns of an individual typist.",
+    "Biometric security combines something you know with something you are for stronger protection.",
+    "Machine learning models trained on temporal sequences reveal deep behavioral fingerprints.",
+    "Continuous authentication monitors user identity throughout an entire working session silently.",
+    "Neural networks process timing data to distinguish genuine users from potential impostors.",
+    "The fusion of recurrent and convolutional pathways enables robust behavioural modelling.",
+    "Security systems must balance false acceptance rates against user experience and friction.",
+    "Dynamic time warping and deep metric learning form the backbone of modern keystroke systems.",
+]
 
 
 # â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -153,6 +251,7 @@ PROMPT_TEXT = (
 def load_threshold_artifact():
     env_thr = os.environ.get("TYPE2BRANCH_THRESHOLD_ARTIFACT", "").strip()
     candidates = [
+        (os.path.join(BASE_DIR, "docs", "Final_EER_Report.json"),                   "threshold_tuned_on_xv"),
         (os.path.join(BASE_DIR, "results_hardened", "threshold_artifact.json"),   "threshold"),
         (os.path.join(BASE_DIR, "results_hardened", "hardened_metrics.json"),      "threshold_tuned_on_xv"),
         (
@@ -410,7 +509,7 @@ def process_raw_events(raw_json_string: str, seq_length: int,
     if not isinstance(events, list):
         st.error("Payload must be a JSON array.")
         return None, ""
-    min_keystrokes = int(os.environ.get("TYPE2BRANCH_APP_MIN_KEYSTROKES", "30"))
+    min_keystrokes = int(os.environ.get("TYPE2BRANCH_APP_MIN_KEYSTROKES", "200"))
     if len(events) < min_keystrokes:
         st.error(
             f"Only {len(events)} keystrokes captured; need at least {min_keystrokes}. "
@@ -464,7 +563,7 @@ def process_continuous_events(raw_json_string: str, seq_length: int,
         st.error("Payload must be a JSON array.")
         return None, ""
     
-    min_keystrokes = int(os.environ.get("TYPE2BRANCH_APP_MIN_KEYSTROKES", "30"))
+    min_keystrokes = int(os.environ.get("TYPE2BRANCH_APP_MIN_KEYSTROKES", "200"))
     if len(events) < min_keystrokes:
         st.error(
             f"Only {len(events)} keystrokes captured; need at least {min_keystrokes}. "
@@ -524,6 +623,101 @@ def gallery_distance(gallery_embeddings: list, query_embedding: np.ndarray):
     return float(np.mean(distances)), float(np.min(distances))
 
 
+# ─── Production: Per-User Threshold Engine ──────────────────────────────────
+
+def compute_personal_threshold(embeddings: list) -> Optional[float]:
+    """Compute a tight per-user threshold from the genuine gallery.
+    Uses the p90 of all pairwise L2 distances * THRESHOLD_SAFETY_MARGIN.
+    Returns None if not enough templates.
+    """
+    import itertools
+    if len(embeddings) < 2:
+        return None
+    dists = [float(np.linalg.norm(a - b))
+             for a, b in itertools.combinations(embeddings, 2)]
+    p_thr = float(np.percentile(dists, PERSONAL_THRESHOLD_PERCENTILE))
+    return p_thr * THRESHOLD_SAFETY_MARGIN
+
+
+def compute_enrollment_quality(embeddings: list) -> dict:
+    """Return quality stats for the enrollment gallery."""
+    import itertools
+    if len(embeddings) < 2:
+        return {"score": 0.0, "n": len(embeddings),
+                "intra_mean": None, "intra_std": None, "threshold": None}
+    dists = [float(np.linalg.norm(a - b))
+             for a, b in itertools.combinations(embeddings, 2)]
+    mu  = float(np.mean(dists))
+    std = float(np.std(dists))
+    # EQS: 0→1, high = consistent (low relative std)
+    eqs = max(0.0, 1.0 - (std / (mu + 1e-6)))
+    thr = compute_personal_threshold(embeddings)
+    return {"score": round(eqs, 3), "n": len(embeddings),
+            "intra_mean": round(mu, 4), "intra_std": round(std, 4),
+            "threshold": round(thr, 4) if thr else None}
+
+
+def is_enrollment_outlier(new_emb: np.ndarray, existing_embs: list,
+                          sigma: float = 2.5) -> tuple:
+    """Return (is_outlier, reason) for a new enrollment sample."""
+    if len(existing_embs) < 2:
+        return False, ""
+    q = compute_enrollment_quality(existing_embs)
+    mu  = q["intra_mean"]
+    std = q["intra_std"]
+    if mu is None or std is None:
+        return False, ""
+    centroid = np.mean(np.stack(existing_embs), axis=0)
+    dist_to_centroid = float(np.linalg.norm(new_emb - centroid))
+    # If new sample is more than sigma*std away from centroid, flag it
+    cutoff = mu + sigma * (std + 1e-6)
+    if dist_to_centroid > cutoff:
+        return True, (f"Sample distance {dist_to_centroid:.2f} from gallery centre "
+                      f"exceeds cutoff {cutoff:.2f} (μ={mu:.2f}, σ={std:.2f}). "
+                      "Retake more naturally.")
+    return False, ""
+
+
+def check_typing_plausibility(raw_events: list) -> tuple:
+    """Check for superhuman / bot / replay patterns.
+    Returns (is_suspicious, reason).
+    """
+    if len(raw_events) < 5:
+        return False, ""
+    holds  = [ev[1] for ev in raw_events if isinstance(ev, list) and len(ev) > 1]
+    flights = [ev[2] for ev in raw_events if isinstance(ev, list) and len(ev) > 2]
+    if not holds:
+        return False, ""
+    # 1. Superhuman consistency: hold time variance < 0.5ms
+    h_std = float(np.std(holds))
+    if h_std < 0.0005:
+        return True, f"Hold-time std {h_std*1000:.2f}ms is impossibly consistent (bot suspected)"
+    # 2. Superhuman speed: mean hold < 20ms
+    h_mean = float(np.mean(holds))
+    if h_mean < 0.020:
+        return True, f"Mean hold {h_mean*1000:.0f}ms is superhuman (< 20ms)"
+    # 3. All identical hold times (replayed vector)
+    unique_holds = len(set(round(h, 4) for h in holds))
+    if unique_holds < max(3, len(holds) // 10):
+        return True, f"Only {unique_holds} unique hold times — possible replay attack"
+    # 4. Flight time all zero (paste / instant input)
+    if flights:
+        f_mean = float(np.mean([abs(f) for f in flights]))
+        if f_mean < 0.001:
+            return True, "All flight times near-zero — paste or replay detected"
+    return False, ""
+
+
+# ─── Production: Rolling Gallery Update ─────────────────────────────────────
+
+def update_rolling_gallery(existing_embs: list, new_emb: np.ndarray) -> list:
+    """Append new_emb and enforce rolling window of ROLLING_GALLERY_MAX."""
+    updated = existing_embs + [new_emb]
+    if len(updated) > ROLLING_GALLERY_MAX:
+        updated = updated[-ROLLING_GALLERY_MAX:]
+    return updated
+
+
 # â”€â”€â”€ Keystroke recorder HTML component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 #
 # Architecture:
@@ -536,217 +730,478 @@ def gallery_distance(gallery_embeddings: list, query_embedding: np.ndarray):
 # Key stability rule (fixes DuplicateWidgetID + value-loss bugs):
 #   We use a fixed key derived from `mode` only â€” never from uuid or id().
 
-def build_keystroke_recorder(mode: str) -> Optional[str]:
+# ─── XAI: Extract raw timing stats from keystroke payload ────────────────────
+
+def extract_timing_stats(raw_events: list) -> dict:
+    """Return mean/std of hold & flight times (in ms) from raw event list."""
+    holds   = [ev[1] * 1000.0 for ev in raw_events if isinstance(ev, list) and len(ev) > 1]
+    flights = [ev[2] * 1000.0 for ev in raw_events if isinstance(ev, list) and len(ev) > 2]
+    if not holds:
+        return {}
+    result = {
+        "hold_mean":   float(np.mean(holds)),
+        "hold_std":    float(np.std(holds)),
+        "hold_p25":    float(np.percentile(holds, 25)),
+        "hold_p75":    float(np.percentile(holds, 75)),
+        "flight_mean": float(np.mean([abs(x) for x in flights])) if flights else 0.0,
+        "flight_std":  float(np.std([abs(x) for x in flights]))  if flights else 0.0,
+        "n_keys":      len(holds),
+    }
+    return result
+
+
+def render_xai_comparison(query_stats: dict, baseline_stats: dict, label: str = "Query") -> None:
+    """Render a bar chart comparing query timing vs genuine baseline."""
+    if not query_stats or not baseline_stats:
+        return
+    try:
+        import plotly.graph_objects as go
+    except ImportError:
+        st.info("Install plotly for XAI charts: pip install plotly")
+        return
+
+    metrics = ["Hold Mean (ms)", "Hold Std (ms)", "Flight Mean (ms)", "Flight Std (ms)"]
+    query_vals = [
+        query_stats.get("hold_mean",   0),
+        query_stats.get("hold_std",    0),
+        query_stats.get("flight_mean", 0),
+        query_stats.get("flight_std",  0),
+    ]
+    baseline_vals = [
+        baseline_stats.get("hold_mean",   0),
+        baseline_stats.get("hold_std",    0),
+        baseline_stats.get("flight_mean", 0),
+        baseline_stats.get("flight_std",  0),
+    ]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        name="Genuine Baseline",
+        x=metrics, y=baseline_vals,
+        marker_color="rgba(0,240,255,0.7)",
+        marker_line_color="#00f0ff", marker_line_width=1.5,
+    ))
+    fig.add_trace(go.Bar(
+        name=label,
+        x=metrics, y=query_vals,
+        marker_color="rgba(239,68,68,0.6)" if label != "Genuine User" else "rgba(16,185,129,0.6)",
+        marker_line_color="#ef4444" if label != "Genuine User" else "#10b981",
+        marker_line_width=1.5,
+    ))
+    fig.update_layout(
+        barmode="group",
+        title=dict(text="⚡ Keystroke Timing Signature Comparison", font=dict(color="#f8fafc", size=14)),
+        paper_bgcolor="rgba(15,23,42,0.0)",
+        plot_bgcolor="rgba(15,23,42,0.4)",
+        font=dict(color="#94a3b8", size=11),
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#e2e8f0")),
+        xaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
+        yaxis=dict(gridcolor="rgba(255,255,255,0.05)", title="milliseconds"),
+        margin=dict(l=20, r=20, t=45, b=20),
+        height=320,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# ─── Feature 3: PCA Embed Space Visualization ────────────────────────────────
+
+def render_embed_scatter(gallery_embs: list, query_emb: np.ndarray,
+                         label: str = "Query", granted: bool = False) -> None:
+    """Render 2D PCA scatter: gallery = green cluster, query = colored dot."""
+    if len(gallery_embs) < 2:
+        return
+    try:
+        import plotly.graph_objects as go
+    except ImportError:
+        st.info("Install plotly: pip install plotly")
+        return
+
+    # Stack gallery + query
+    all_embs = np.stack(gallery_embs + [query_emb], axis=0)  # (N+1, D)
+    # Manual PCA (2 components) — no sklearn needed
+    mu  = all_embs.mean(axis=0)
+    X   = all_embs - mu
+    cov = np.cov(X.T)
+    if cov.ndim < 2:
+        return
+    try:
+        vals, vecs = np.linalg.eigh(cov)
+    except Exception:
+        return
+    # Take top 2 eigenvectors (largest eigenvalues)
+    idx = np.argsort(vals)[::-1]
+    pc  = vecs[:, idx[:2]]
+    coords = X @ pc  # (N+1, 2)
+
+    gallery_pts = coords[:len(gallery_embs)]
+    query_pt    = coords[len(gallery_embs)]
+
+    fig = go.Figure()
+    # Gallery cluster
+    fig.add_trace(go.Scatter(
+        x=gallery_pts[:, 0], y=gallery_pts[:, 1],
+        mode="markers",
+        name="Genuine Gallery",
+        marker=dict(color="rgba(0,240,255,0.8)", size=10,
+                    line=dict(color="#00f0ff", width=1.5),
+                    symbol="circle"),
+    ))
+    # Centroid
+    cx, cy = float(gallery_pts[:, 0].mean()), float(gallery_pts[:, 1].mean())
+    fig.add_trace(go.Scatter(
+        x=[cx], y=[cy], mode="markers", name="Centroid",
+        marker=dict(color="#00f0ff", size=16, symbol="star",
+                    line=dict(color="#ffffff", width=1)),
+    ))
+    # Query point
+    q_color = "#10b981" if granted else "#ef4444"
+    q_sym   = "circle-dot" if granted else "x"
+    fig.add_trace(go.Scatter(
+        x=[query_pt[0]], y=[query_pt[1]], mode="markers",
+        name=label,
+        marker=dict(color=q_color, size=16, symbol=q_sym,
+                    line=dict(color="white", width=2)),
+    ))
+    fig.update_layout(
+        title=dict(text="🧠 Embedding Space — PCA Projection", font=dict(color="#f8fafc", size=14)),
+        paper_bgcolor="rgba(15,23,42,0.0)",
+        plot_bgcolor="rgba(15,23,42,0.4)",
+        font=dict(color="#94a3b8", size=11),
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#e2e8f0")),
+        xaxis=dict(title="PC-1", gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+        yaxis=dict(title="PC-2", gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+        margin=dict(l=20, r=20, t=45, b=20),
+        height=370,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# ─── Feature 5: Leaderboard helpers ─────────────────────────────────────────
+
+def leaderboard_record(attacker_name: str, min_dist: float, verdict: str,
+                       query_stats: dict) -> dict:
+    return {
+        "name":      attacker_name,
+        "min_dist":  round(min_dist, 4),
+        "verdict":   verdict,
+        "hold_mean": round(query_stats.get("hold_mean", 0), 1),
+        "flight_mean": round(query_stats.get("flight_mean", 0), 1),
+        "ts":        datetime.now().strftime("%H:%M:%S"),
+    }
+
+
+
+# ─── XAI: Extract raw timing stats from keystroke payload ────────────────────
+
+def extract_timing_stats(raw_events: list) -> dict:
+    """Return mean/std of hold & flight times (in ms) from raw event list."""
+    holds   = [ev[1] * 1000.0 for ev in raw_events if isinstance(ev, list) and len(ev) > 1]
+    flights = [ev[2] * 1000.0 for ev in raw_events if isinstance(ev, list) and len(ev) > 2]
+    if not holds:
+        return {}
+    result = {
+        "hold_mean":   float(np.mean(holds)),
+        "hold_std":    float(np.std(holds)),
+        "hold_p25":    float(np.percentile(holds, 25)),
+        "hold_p75":    float(np.percentile(holds, 75)),
+        "flight_mean": float(np.mean([abs(x) for x in flights])) if flights else 0.0,
+        "flight_std":  float(np.std([abs(x) for x in flights]))  if flights else 0.0,
+        "n_keys":      len(holds),
+    }
+    return result
+
+def render_xai_comparison(query_stats: dict, baseline_stats: dict, label: str = "Query") -> None:
+    """Render a bar chart comparing query timing vs genuine baseline."""
+    if not query_stats or not baseline_stats:
+        return
+    try:
+        import plotly.graph_objects as go
+    except ImportError:
+        st.info("Install plotly for XAI charts: pip install plotly")
+        return
+
+    metrics = ["Hold Mean (ms)", "Hold Std (ms)", "Flight Mean (ms)", "Flight Std (ms)"]
+    query_vals = [
+        query_stats.get("hold_mean",   0),
+        query_stats.get("hold_std",    0),
+        query_stats.get("flight_mean", 0),
+        query_stats.get("flight_std",  0),
+    ]
+    baseline_vals = [
+        baseline_stats.get("hold_mean",   0),
+        baseline_stats.get("hold_std",    0),
+        baseline_stats.get("flight_mean", 0),
+        baseline_stats.get("flight_std",  0),
+    ]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        name="Genuine Baseline",
+        x=metrics, y=baseline_vals,
+        marker_color="rgba(0,240,255,0.7)",
+        marker_line_color="#00f0ff", marker_line_width=1.5,
+    ))
+    fig.add_trace(go.Bar(
+        name=label,
+        x=metrics, y=query_vals,
+        marker_color="rgba(239,68,68,0.6)" if label != "Genuine User" else "rgba(16,185,129,0.6)",
+        marker_line_color="#ef4444" if label != "Genuine User" else "#10b981",
+        marker_line_width=1.5,
+    ))
+    fig.update_layout(
+        barmode="group",
+        title=dict(text="⚡ Keystroke Timing Signature Comparison", font=dict(color="#f8fafc", size=14)),
+        paper_bgcolor="rgba(15,23,42,0.0)",
+        plot_bgcolor="rgba(15,23,42,0.4)",
+        font=dict(color="#94a3b8", size=11),
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#e2e8f0")),
+        xaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
+        yaxis=dict(gridcolor="rgba(255,255,255,0.05)", title="milliseconds"),
+        margin=dict(l=20, r=20, t=45, b=20),
+        height=320,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+def render_embed_scatter(gallery_embs: list, query_emb: np.ndarray,
+                         label: str = "Query", granted: bool = False) -> None:
+    """Render 2D PCA scatter: gallery = green cluster, query = colored dot."""
+    if len(gallery_embs) < 2:
+        return
+    try:
+        import plotly.graph_objects as go
+    except ImportError:
+        st.info("Install plotly: pip install plotly")
+        return
+
+    import numpy as np
+    all_embs = np.stack(gallery_embs + [query_emb], axis=0)
+    mu  = all_embs.mean(axis=0)
+    X   = all_embs - mu
+    cov = np.cov(X.T)
+    if cov.ndim < 2:
+        return
+    try:
+        vals, vecs = np.linalg.eigh(cov)
+    except Exception:
+        return
+    idx = np.argsort(vals)[::-1]
+    pc  = vecs[:, idx[:2]]
+    coords = X @ pc
+
+    gallery_pts = coords[:len(gallery_embs)]
+    query_pt    = coords[len(gallery_embs)]
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=gallery_pts[:, 0], y=gallery_pts[:, 1],
+        mode="markers", name="Genuine Gallery",
+        marker=dict(color="rgba(0,240,255,0.8)", size=10, line=dict(color="#00f0ff", width=1.5), symbol="circle"),
+    ))
+    cx, cy = float(gallery_pts[:, 0].mean()), float(gallery_pts[:, 1].mean())
+    fig.add_trace(go.Scatter(
+        x=[cx], y=[cy], mode="markers", name="Centroid",
+        marker=dict(color="#00f0ff", size=16, symbol="star", line=dict(color="#ffffff", width=1)),
+    ))
+    q_color = "#10b981" if granted else "#ef4444"
+    q_sym   = "circle-dot" if granted else "x"
+    fig.add_trace(go.Scatter(
+        x=[query_pt[0]], y=[query_pt[1]], mode="markers", name=label,
+        marker=dict(color=q_color, size=16, symbol=q_sym, line=dict(color="white", width=2)),
+    ))
+    fig.update_layout(
+        title=dict(text="🧠 Embedding Space — PCA Projection", font=dict(color="#f8fafc", size=14)),
+        paper_bgcolor="rgba(15,23,42,0.0)", plot_bgcolor="rgba(15,23,42,0.4)",
+        font=dict(color="#94a3b8", size=11), legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#e2e8f0")),
+        xaxis=dict(title="PC-1", gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+        yaxis=dict(title="PC-2", gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+        margin=dict(l=20, r=20, t=45, b=20), height=370,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+def leaderboard_record(attacker_name: str, min_dist: float, verdict: str, query_stats: dict) -> dict:
+    from datetime import datetime
+    return {
+        "name":      attacker_name,
+        "min_dist":  round(min_dist, 4),
+        "verdict":   verdict,
+        "hold_mean": round(query_stats.get("hold_mean", 0), 1),
+        "flight_mean": round(query_stats.get("flight_mean", 0), 1),
+        "ts":        datetime.now().strftime("%H:%M:%S"),
+    }
+
+def build_keystroke_recorder(mode: str, prompt_text: str = "") -> Optional[str]:
     """
     Render keystroke recorder for *mode* ('enroll' or 'test').
-    Returns the currently-pasted JSON string, or None.
+
+    Architecture (no copy/paste required):
+      • An HTML iframe captures keydown/keyup timestamps in JS memory.
+      • On every keyup (debounced 150 ms), JS pushes the JSON payload to the
+        hidden Streamlit textarea below via window.parent DOM access.
+        (Both served from the same localhost origin, so access is permitted.)
+      • The user just types, then clicks the form submit button.  Pauses in
+        the middle of the sentence are fine — all events accumulate.
+      • The "Clear & Retype" button resets both the iframe and the parent.
     """
-    ss_key     = f"ksr_payload_{mode}"   # stable session_state key
-    widget_key = f"ksr_textarea_{mode}"  # stable Streamlit widget key
-    # Use a stable component_id based only on mode to avoid duplicate-element
-    # bugs while still namespacing CSS/JS between enroll and test recorders.
+    if not prompt_text:
+        prompt_text = CHALLENGE_PHRASES[0]
+    ss_key       = f"ksr_payload_{mode}"    # stable session_state key
+    widget_key   = f"ksr_textarea_{mode}"   # stable Streamlit widget key
     component_id = f"ksr_{mode}"
+    aria_lbl     = f"ksr_hidden_{mode}"     # JS in iframe finds parent textarea by this
 
     html_code = f"""
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
-  body {{
-    margin:0; font-family:'Outfit', sans-serif;
-    background: transparent;
-    color: #e2e8f0;
-  }}
+  body {{ margin:0; font-family:'Outfit',sans-serif; background:transparent; color:#e2e8f0; }}
   .ksr-prompt {{
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 14px 18px;
-    font-size: 14px;
-    margin-bottom: 12px;
-    border-left: 4px solid #00f0ff;
-    line-height: 1.6;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: rgba(15,23,42,0.6); backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,0.05); border-radius:12px;
+    padding:14px 18px; font-size:14px; margin-bottom:12px;
+    border-left:4px solid #00f0ff; line-height:1.6;
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
   }}
-  .ksr-phrase {{
-    color: #00f0ff;
-    font-weight: 700;
-    letter-spacing: 0.2px;
-  }}
+  .ksr-phrase {{ color:#00f0ff; font-weight:700; letter-spacing:.2px; }}
   textarea#ta_{component_id} {{
-    width: 100%; box-sizing: border-box; border-radius: 10px;
-    padding: 14px; font-size: 15px;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    background: rgba(15, 23, 42, 0.8);
-    color: #f8fafc; resize: vertical;
-    min-height: 90px; outline: none;
-    transition: all 0.3s ease;
-    font-family: 'Outfit', sans-serif;
-    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    width:100%; box-sizing:border-box; border-radius:10px;
+    padding:14px; font-size:15px;
+    border:1px solid rgba(148,163,184,.2);
+    background:rgba(15,23,42,.8); color:#f8fafc; resize:vertical;
+    min-height:90px; outline:none; transition:all .3s ease;
+    font-family:'Outfit',sans-serif;
+    box-shadow:inset 0 2px 4px 0 rgba(0,0,0,.06);
   }}
   textarea#ta_{component_id}:focus {{
-    border-color: #00f0ff;
-    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15), inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    border-color:#00f0ff;
+    box-shadow:0 0 0 3px rgba(0,240,255,.15),inset 0 2px 4px 0 rgba(0,0,0,.06);
   }}
-  textarea#ta_{component_id}::placeholder {{
-    color: #475569;
-  }}
-  .ksr-bar {{
-    margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  }}
+  textarea#ta_{component_id}::placeholder {{ color:#475569; }}
+  .ksr-bar {{ margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }}
   .ksr-status {{
-    font-size: 12px; padding: 6px 14px; border-radius: 20px;
-    font-weight: 600; min-width: 160px; text-align: center;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    transition: all 0.3s ease;
+    font-size:12px; padding:6px 16px; border-radius:20px; font-weight:600;
+    flex:1; text-align:center; text-transform:uppercase; letter-spacing:.5px;
+    transition:all .3s ease;
   }}
-  .ksr-ok {{
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
-  }}
-  .ksr-warn {{
-    background: rgba(245, 158, 11, 0.15);
-    color: #f59e0b;
-    border: 1px solid rgba(245, 158, 11, 0.3);
-  }}
-  .ksr-btn {{
-    padding: 8px 18px; font-size: 13px;
-    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-    color: #fff; border: none; border-radius: 8px;
-    cursor: pointer; font-weight: 600;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
-  }}
-  .ksr-btn:hover {{
-    transform: translateY(-1px);
-    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
-    background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%);
-  }}
-  .ksr-btn:active {{
-    transform: translateY(1px);
-    box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.3);
-  }}
+  .ksr-warn   {{ background:rgba(245,158,11,.15);  color:#f59e0b; border:1px solid rgba(245,158,11,.3); }}
+  .ksr-ok     {{ background:rgba(16,185,129,.15);  color:#10b981; border:1px solid rgba(16,185,129,.3); box-shadow:0 0 10px rgba(16,185,129,.1); }}
+  .ksr-synced {{ background:rgba(0,240,255,.1);    color:#00f0ff; border:1px solid rgba(0,240,255,.25); box-shadow:0 0 8px rgba(0,240,255,.1); }}
   .ksr-btn-clear {{
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+    padding:7px 16px; font-size:12px; background:rgba(239,68,68,.15);
+    color:#ef4444; border:1px solid rgba(239,68,68,.3); border-radius:8px;
+    cursor:pointer; font-weight:600; transition:all .2s ease; white-space:nowrap;
   }}
-  .ksr-btn-clear:hover {{
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4);
-  }}
+  .ksr-btn-clear:hover {{ background:rgba(239,68,68,.28); box-shadow:0 0 8px rgba(239,68,68,.2); }}
+  .ksr-hint {{ font-size:11px; color:#64748b; margin-top:7px; font-style:italic; }}
 </style>
 <div>
   <div class="ksr-prompt">
     Type this sentence naturally:<br>
-    <span class="ksr-phrase">"{PROMPT_TEXT}"</span>
+    <span class="ksr-phrase">"{prompt_text}"</span>
   </div>
-  <textarea id="ta_{component_id}" placeholder="Start typing here..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+  <textarea id="ta_{component_id}"
+    placeholder="Start typing here — keystrokes are captured automatically. No copy/paste needed."
+    spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">
+  </textarea>
   <div class="ksr-bar">
     <span class="ksr-status ksr-warn" id="status_{component_id}">0 keystrokes</span>
-    <button class="ksr-btn" id="btn_copy_{component_id}">Copy JSON payload</button>
-    <button class="ksr-btn ksr-btn-clear" id="btn_clear_{component_id}">Clear</button>
+    <button class="ksr-btn-clear" id="btn_clear_{component_id}">&#8635; Clear &amp; Retype</button>
   </div>
+  <div class="ksr-hint">&#128274; Keystroke data syncs live &mdash; just type naturally, then click the button below.</div>
 </div>
 <script>
 (function() {{
-  var ta           = document.getElementById("ta_{component_id}");
-  var statusEl     = document.getElementById("status_{component_id}");
-  var btnCopy      = document.getElementById("btn_copy_{component_id}");
-  var btnClear     = document.getElementById("btn_clear_{component_id}");
-  var key_events   = [];
-  var key_times    = {{}};
-  var last_keyup   = null;
+  var ta         = document.getElementById("ta_{component_id}");
+  var statusEl   = document.getElementById("status_{component_id}");
+  var btnClear   = document.getElementById("btn_clear_{component_id}");
+  var key_events = [];
+  var key_times  = {{}};
+  var last_keyup = null;
+  var syncTimer  = null;
+
+  // Push JSON payload to the hidden Streamlit textarea in parent frame.
+  // window.parent.document is accessible because Streamlit serves the iframe
+  // and the parent page from the same localhost origin (no CORS block).
+  function pushToParent(payload) {{
+    try {{
+      var allTA = window.parent.document.querySelectorAll("textarea");
+      for (var i = 0; i < allTA.length; i++) {{
+        if ((allTA[i].getAttribute("aria-label") || "") === "{aria_lbl}") {{
+          var setter = Object.getOwnPropertyDescriptor(
+            window.parent.HTMLTextAreaElement.prototype, "value"
+          ).set;
+          setter.call(allTA[i], payload);
+          allTA[i].dispatchEvent(new Event("input", {{ bubbles: true }}));
+          return true;
+        }}
+      }}
+    }} catch(e) {{}}
+    return false;
+  }}
+
+  function syncNow() {{
+    if (key_events.length === 0) return;
+    var ok = pushToParent(JSON.stringify(key_events));
+    if (ok) {{
+      statusEl.className = "ksr-status ksr-synced";
+      statusEl.innerText = key_events.length + " keystrokes \u2714 ready \u2014 click the button below";
+    }}
+  }}
 
   ta.addEventListener("keydown", function(e) {{
-    if (!e.repeat) {{
-      key_times[e.key] = performance.now();
-    }}
+    if (!e.repeat) {{ key_times[e.key] = performance.now(); }}
   }});
 
   ta.addEventListener("keyup", function(e) {{
-    var press_time = key_times[e.key];
-    if (press_time !== undefined) {{
-      var rel   = performance.now();
-      var hold  = (rel - press_time) / 1000.0;
-      var flight = last_keyup !== null ? (press_time - last_keyup) / 1000.0 : 0.0;
+    var t0 = key_times[e.key];
+    if (t0 !== undefined) {{
+      var rel    = performance.now();
+      var hold   = (rel - t0)   / 1000.0;
+      var flight = last_keyup !== null ? (t0 - last_keyup) / 1000.0 : 0.0;
       last_keyup = rel;
       delete key_times[e.key];
-      var kc = (e.key.length === 1) ? e.key.charCodeAt(0) : 0;
+      var kc = e.key.length === 1 ? e.key.charCodeAt(0) : 0;
       key_events.push([kc / 255.0, hold, flight]);
       var n = key_events.length;
-      statusEl.className = "ksr-status " + (n >= 30 ? "ksr-ok" : "ksr-warn");
-      statusEl.innerText = n + " keystrokes" + (n < 30 ? " (need \u226530)" : " \u2713 ready");
+      statusEl.className = "ksr-status " + (n >= 200 ? "ksr-ok" : "ksr-warn");
+      statusEl.innerText  = n + " keystrokes" + (n < 200 ? " (need \u2265200)" : " \u2714 syncing...");
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(syncNow, 150);
     }}
-  }});
-
-  function copyToClipboard(text, onDone) {{
-    if (navigator.clipboard && navigator.clipboard.writeText) {{
-      navigator.clipboard.writeText(text).then(onDone).catch(function() {{ fallbackCopy(text, onDone); }});
-    }} else {{
-      fallbackCopy(text, onDone);
-    }}
-  }}
-
-  function fallbackCopy(text, onDone) {{
-    var d = document.createElement("textarea");
-    d.value = text;
-    d.style.position = "fixed";
-    d.style.opacity  = "0";
-    document.body.appendChild(d);
-    d.focus(); d.select();
-    try {{ document.execCommand("copy"); }} catch(err) {{}}
-    document.body.removeChild(d);
-    if (onDone) onDone();
-  }}
-
-  btnCopy.addEventListener("click", function() {{
-    if (key_events.length === 0) {{
-      statusEl.className = "ksr-status ksr-warn";
-      statusEl.innerText = "Nothing to copy - type first!";
-      return;
-    }}
-    var payload = JSON.stringify(key_events);
-    copyToClipboard(payload, function() {{
-      statusEl.innerText = key_events.length + " keystrokes \u2014 copied! Paste below \u2193";
-    }});
   }});
 
   btnClear.addEventListener("click", function() {{
-    key_events = [];
-    key_times  = {{}};
-    last_keyup = null;
-    ta.value   = "";
+    key_events = []; key_times = {{}}; last_keyup = null; ta.value = "";
     statusEl.className = "ksr-status ksr-warn";
     statusEl.innerText = "0 keystrokes";
+    pushToParent("");
   }});
 }})();
 </script>
 """
-    st_html(html_code, height=230, scrolling=False)
+    st_html(html_code, height=245, scrolling=False)
 
-    # â”€â”€ Persistent paste area â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    # IMPORTANT: widget_key is STABLE across reruns (no uuid/id()), so
-    # Streamlit preserves the user's pasted text through button-click reruns.
-    st.markdown("**Paste the copied payload here (Ctrl+V / Cmd+V)**")
-
-    # Pre-fill from session_state only when the widget hasn't been touched
-    # in this session (i.e., the key is not already in st.session_state as a
-    # widget value). This avoids the "value ignored after first render" pitfall.
-    current_in_ss = st.session_state.get(ss_key, "")
-
-    pasted = st.text_area(
-        "Keystroke JSON payload",
-        value=current_in_ss,
-        key=widget_key,
-        height=75,
-        placeholder='After typing above, click "Copy JSON payload" then Ctrl+V here.',
-        label_visibility="collapsed",
+    # Hide the raw textarea visually — JS keeps it populated so the Streamlit
+    # form submit button (Authenticate / Save) reads the latest payload.
+    st.markdown(
+        f"""<style>
+        div[data-testid="stTextArea"]:has(textarea[aria-label="{aria_lbl}"]) {{
+          height:0!important; overflow:hidden!important;
+          margin:0!important; padding:0!important;
+          opacity:0!important; pointer-events:none!important;
+        }}
+        </style>""",
+        unsafe_allow_html=True,
     )
 
-    # Sync widget value back into our own ss_key so callers read from ss_key
-    # and we can clear it independently of the widget's own state.
+    current_in_ss = st.session_state.get(ss_key, "")
+    pasted = st.text_area(
+        aria_lbl,               # becomes aria-label — JS searches for this exact string
+        value=current_in_ss,
+        key=widget_key,
+        height=68,
+        placeholder="",
+        label_visibility="visible",   # keep visible so aria-label is written to DOM
+    )
+
     cleaned = (pasted or "").strip()
     st.session_state[ss_key] = cleaned
     return cleaned or None
@@ -810,6 +1265,23 @@ if "enrollments" not in st.session_state:
     enr, enr_warnings = load_enrollments(SEQ_LEN, N_FEAT)
     st.session_state.enrollments         = enr
     st.session_state.enrollment_warnings = enr_warnings
+# Challenge phrase nonce — rotated each new browser session (anti-replay)
+if "challenge_phrase" not in st.session_state:
+    import random as _random
+    st.session_state.challenge_phrase = _random.choice(CHALLENGE_PHRASES)
+# Per-user auth fail counters and lockout
+if "auth_consec_fails" not in st.session_state:
+    st.session_state.auth_consec_fails = {}
+if "auth_locked" not in st.session_state:
+    st.session_state.auth_locked = {}
+if "stepup_required" not in st.session_state:
+    st.session_state.stepup_required = {}
+# Leaderboard: tracks ALL auth attempts for Challenge Mode
+if "leaderboard" not in st.session_state:
+    st.session_state.leaderboard = []
+# Per-user enrollment timing baseline
+if "enrollment_timing" not in st.session_state:
+    st.session_state.enrollment_timing = {}
 
 # â”€â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.markdown("Enroll typing profiles and authenticate users by their unique keystroke rhythm.")
@@ -835,112 +1307,146 @@ for w in st.session_state.get("enrollment_warnings", []):
 
 # â”€â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with st.sidebar:
-    st.subheader("Demo Controls")
+    st.subheader("🔐 Production Controls")
 
-    # ── Threshold Configuration ──────────────────────────────────────────────
-    # Hardcoded to 13.0: tighter than the EER-optimal 15.14 to ensure
-    # impostors are reliably rejected even in a live single-user demo.
-    DEMO_THRESHOLD = 14.5
+    enrolled_now  = st.session_state.get("enrollments", {})
+    all_embs_flat = [emb for embs in enrolled_now.values() for emb in embs]
+    _auto_threshold = 14.5
+    _intra_mean, _intra_std = None, None
+    if len(all_embs_flat) >= 2:
+        import itertools as _it
+        pairwise = [float(np.linalg.norm(a - b))
+                    for a, b in _it.combinations(all_embs_flat, 2)]
+        _intra_mean = float(np.mean(pairwise))
+        _intra_std  = float(np.std(pairwise))
+        _p90        = float(np.percentile(pairwise, PERSONAL_THRESHOLD_PERCENTILE))
+        _auto_threshold = _p90 * THRESHOLD_SAFETY_MARGIN
+
+    st.caption(f"Auto-calibrated (p{PERSONAL_THRESHOLD_PERCENTILE} x {THRESHOLD_SAFETY_MARGIN}x): `{_auto_threshold:.4f}`")
+    tightness = st.slider(
+        "Tightness multiplier", min_value=0.5, max_value=1.5, value=1.0, step=0.05,
+        help="< 1.0 = stricter. > 1.0 = looser. Keep 1.0 for auto."
+    )
+    DEMO_THRESHOLD = _auto_threshold * tightness
 
     st.divider()
-
     enable_llm_gate = st.checkbox("Enable LLM/Paste gate", value=True)
     llm_threshold   = st.number_input(
-        "LLM gate threshold",
-        min_value=0.0, max_value=1.0,
+        "LLM gate threshold", min_value=0.0, max_value=1.0,
         value=float(os.environ.get("TYPE2BRANCH_APP_LLM_THRESHOLD", "0.35")),
-        step=0.01, format="%.2f",
-        disabled=not enable_llm_gate,
+        step=0.01, format="%.2f", disabled=not enable_llm_gate,
     )
-    min_templates_for_auth = st.number_input(
-        "Min templates for auth",
-        min_value=1,
-        value=1,
-        step=1,
-    )
-    
     st.divider()
     st.subheader("Continuous Auth Settings")
     decision_window = st.number_input("Decision Window (smoothing)", min_value=1, value=5, step=1)
-    alarm_consecutive = st.number_input("Consecutive Alarms to Block", min_value=1, value=3, step=1)
-    window_stride = st.number_input("Window Stride (keystrokes)", min_value=1, value=10, step=1)
-    
-    if not has_weights:
-        st.info(
-            "App is running in degraded mode: model weights are unavailable, so enrollment "
-            "and authentication are disabled until the checkpoint loads successfully."
-        )
-
+    window_stride   = st.number_input("Window Stride (keystrokes)",  min_value=1, value=10, step=1)
     st.divider()
-    st.caption(f"Threshold: `{DEMO_THRESHOLD}`")
+    if not has_weights:
+        st.error("Weights missing — enroll/auth disabled.")
+    st.caption(f"Effective threshold: `{DEMO_THRESHOLD:.4f}` ({tightness:.2f}x)")
     st.caption(f"Checkpoint: `{os.path.basename(checkpoint_path)}`")
     st.caption(f"sha256: `{checkpoint_hash}`")
-    if checkpoint_mtime > 0:
-        st.caption(
-            f"mtime: {datetime.fromtimestamp(checkpoint_mtime).strftime('%Y-%m-%d %H:%M')}"
-        )
 
 effective_threshold: Optional[float] = DEMO_THRESHOLD
 
-# â”€â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-tab_enroll, tab_auth = st.tabs(["Enroll Users", "Authenticate"])
+tab_enroll, tab_auth = st.tabs(["📋 Enroll Users", "🔑 Authenticate"])
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 1 â€” ENROLL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ══════════════════════════════════════════════════════════════════
+# TAB 1 — ENROLL
+# ══════════════════════════════════════════════════════════════════
 with tab_enroll:
     st.subheader("Enroll a user's typing profile")
+    st.info(
+        f"**Minimum {MIN_ENROLLMENT_TEMPLATES} samples required** before authentication is enabled (10-15 recommended for better accuracy). "
+        "Enroll at different times of day for best security."
+    )
 
     if not has_weights:
-        st.error(
-            "Model weights are not loaded - cannot compute embeddings. "
-            f"Expected checkpoint at: `{checkpoint_path}`"
-        )
+        st.error(f"Model weights not loaded. Expected at: `{checkpoint_path}`")
     else:
+        enroll_phrase = CHALLENGE_PHRASES[0]
         with st.form("enroll_form"):
-            uid = st.text_input(
-                "User ID",
-                placeholder="e.g. alice",
-                key="enroll_uid_input",
-            )
-            st.markdown("#### Step 1 - Type the sentence and copy the payload")
-            enroll_payload = build_keystroke_recorder("enroll")
-            st.markdown("#### Step 2 - Save the sample")
+            uid = st.text_input("User ID", placeholder="e.g. alice", key="enroll_uid_input")
+            st.markdown("#### Step 1 — Type the phrase and copy the payload")
+            enroll_payload = build_keystroke_recorder("enroll", enroll_phrase)
+            st.markdown("#### Step 2 — Save the sample")
             save_enroll_clicked = st.form_submit_button(
-                "Save Enrollment Sample",
-                type="primary",
-                use_container_width=True,
+                "Save Enrollment Sample", type="primary", use_container_width=True
             )
+
         if save_enroll_clicked:
             uid_clean = (uid or "").strip()
             if not uid_clean:
                 st.warning("Enter a User ID before saving.")
             elif not enroll_payload:
-                st.warning(
-                "No payload detected. "
-                "Type the sentence above -> click **Copy JSON payload** -> paste into the box."
-                )
+                st.warning("No payload. Type the sentence -> Copy JSON -> Paste -> Save.")
             else:
-                with st.spinner("Computing embedding..."):
-                    seq, _ = process_raw_events(enroll_payload, SEQ_LEN, N_FEAT)
-                if seq is not None:
-                    batch = np.expand_dims(seq, axis=0)
-                    emb   = model.predict(batch, verbose=0)[0].astype(np.float32)
-                    st.session_state.enrollments.setdefault(uid_clean, []).append(emb)
-                    try:
-                        save_enrollments(
-                            st.session_state.enrollments,
-                            SEQ_LEN, N_FEAT, checkpoint_hash, threshold_source,
-                        )
-                    except Exception as exc:
-                        st.error(f"Disk save failed ({exc}). Enrollment is in memory only this session.")
-                    n = len(st.session_state.enrollments[uid_clean])
-                    st.success(f"Saved. **{uid_clean}** now has {n} template(s).")
-                    # Clear payload so next enroll starts fresh
-                    st.session_state["ksr_payload_enroll"] = ""
-                    st.rerun()
+                try:
+                    raw_evts = json.loads(enroll_payload)
+                except Exception:
+                    raw_evts = []
 
-    # â”€â”€ Enrolled users list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                plausible, plaus_reason = check_typing_plausibility(raw_evts)
+                if plausible:
+                    st.error(f"Suspicious input: **{plaus_reason}**\nType naturally and retry.")
+                else:
+                    with st.spinner("Computing embedding..."):
+                        seq, _ = process_raw_events(enroll_payload, SEQ_LEN, N_FEAT)
+                    if seq is not None:
+                        batch = np.expand_dims(seq, axis=0)
+                        emb   = model.predict(batch, verbose=0)[0].astype(np.float32)
+                        existing = st.session_state.enrollments.get(uid_clean, [])
+                        is_outlier, outlier_reason = is_enrollment_outlier(emb, existing)
+                        if is_outlier:
+                            st.warning(
+                                f"Sample quality warning: {outlier_reason}\n\n"
+                                "Sample **not saved**. Please retype more naturally."
+                            )
+                        else:
+                            updated = update_rolling_gallery(existing, emb)
+                            st.session_state.enrollments[uid_clean] = updated
+                            # Store / update timing baseline for XAI
+                            t_stats = extract_timing_stats(raw_evts)
+                            if t_stats:
+                                old_t = st.session_state.enrollment_timing.get(uid_clean, {})
+                                if old_t:
+                                    for k in ("hold_mean", "hold_std", "flight_mean", "flight_std"):
+                                        old_t[k] = 0.7 * old_t.get(k, t_stats[k]) + 0.3 * t_stats[k]
+                                    st.session_state.enrollment_timing[uid_clean] = old_t
+                                else:
+                                    st.session_state.enrollment_timing[uid_clean] = t_stats
+                            try:
+                                save_enrollments(
+                                    st.session_state.enrollments,
+                                    SEQ_LEN, N_FEAT, checkpoint_hash, threshold_source,
+                                )
+                            except Exception as exc:
+                                st.error(f"Disk save failed ({exc}). In-memory only.")
+                            n       = len(updated)
+                            quality = compute_enrollment_quality(updated)
+                            eqs_pct = int(quality["score"] * 100)
+                            thr_val = quality["threshold"]
+                            st.success(f"Saved. **{uid_clean}** now has **{n}** template(s).")
+                            if n >= MIN_ENROLLMENT_TEMPLATES:
+                                if eqs_pct >= 60:
+                                    st.success(
+                                        f"Profile strength: **{eqs_pct}%** | "
+                                        f"Personal threshold: **{thr_val}** | "
+                                        "Authentication **enabled**!"
+                                    )
+                                else:
+                                    st.warning(
+                                        f"Profile strength: **{eqs_pct}%** (Needs to be >= 60%) | "
+                                        f"Authentication **disabled** due to poor quality. Please delete bad samples or re-enroll for a consistent baseline."
+                                    )
+                            else:
+                                st.info(
+                                    f"Profile strength: {eqs_pct}% | "
+                                    f"Add **{MIN_ENROLLMENT_TEMPLATES - n} more sample(s)** to enable auth."
+                                )
+                            st.session_state["ksr_payload_enroll"] = ""
+                            st.rerun()
+
     st.divider()
     st.subheader("Enrolled users")
     all_enrollments = st.session_state.enrollments
@@ -948,24 +1454,23 @@ with tab_enroll:
         st.info("No users enrolled yet.")
     else:
         for u in sorted(all_enrollments):
-            n = len(all_enrollments[u])
-            st.write(f"- **{u}**: {n} template{'s' if n != 1 else ''}")
-
+            embs = all_enrollments[u]
+            n    = len(embs)
+            q    = compute_enrollment_quality(embs)
+            ready = "Ready" if n >= MIN_ENROLLMENT_TEMPLATES else f"{n}/{MIN_ENROLLMENT_TEMPLATES}"
+            thr_disp = f"{q['threshold']}" if q['threshold'] else "not yet"
+            st.write(
+                f"- **{u}**: {n} template(s) [{ready}] | "
+                f"Strength: {int(q['score']*100)}% | Threshold: `{thr_disp}`"
+            )
         st.divider()
         c1, c2 = st.columns(2)
         with c1:
-            del_uid = st.selectbox(
-                "Delete user",
-                options=[""] + sorted(all_enrollments),
-                key="del_uid_select",
-            )
+            del_uid = st.selectbox("Delete user", options=[""] + sorted(all_enrollments), key="del_uid_select")
             if st.button("Delete selected", disabled=not del_uid):
                 if del_uid in st.session_state.enrollments:
                     del st.session_state.enrollments[del_uid]
-                    save_enrollments(
-                        st.session_state.enrollments,
-                        SEQ_LEN, N_FEAT, checkpoint_hash, threshold_source,
-                    )
+                    save_enrollments(st.session_state.enrollments, SEQ_LEN, N_FEAT, checkpoint_hash, threshold_source)
                     st.success(f"Deleted '{del_uid}'.")
                     st.rerun()
         with c2:
@@ -976,146 +1481,239 @@ with tab_enroll:
                 st.success("All enrollments cleared.")
                 st.rerun()
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 2 â€” AUTHENTICATE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ══════════════════════════════════════════════════════════════════
+# TAB 2 — AUTHENTICATE  (production hardened)
+# ══════════════════════════════════════════════════════════════════
 with tab_auth:
     st.subheader("Authenticate a user")
 
     if not st.session_state.enrollments:
         st.info("No enrolled users. Go to **Enroll Users** tab first.")
     elif not has_weights:
-        st.error("Model weights not loaded - cannot authenticate.")
+        st.error("Model weights not loaded — cannot authenticate.")
     else:
-        with st.form("auth_form"):
-            selected_user = st.selectbox(
-                "Select enrolled user",
-                options=sorted(st.session_state.enrollments.keys()),
-                key="auth_user_select",
-            )
-            n_templates = len(st.session_state.enrollments[selected_user])
-            st.caption(f"**{selected_user}** - {n_templates} template(s) enrolled.")
+        valid_users   = sorted(st.session_state.enrollments.keys())
+        selected_user = st.selectbox("Select user", options=valid_users, key="auth_user_select")
+        user_embs     = st.session_state.enrollments[selected_user]
+        n_templates   = len(user_embs)
 
-            if n_templates < int(min_templates_for_auth):
+        # Per-user personal threshold
+        personal_thr = compute_personal_threshold(user_embs)
+        if personal_thr is not None:
+            active_thr = personal_thr * tightness
+            st.caption(
+                f"Personal threshold for *{selected_user}*: `{active_thr:.4f}` "
+                f"(p{PERSONAL_THRESHOLD_PERCENTILE}={personal_thr/THRESHOLD_SAFETY_MARGIN:.4f} "
+                f"x {THRESHOLD_SAFETY_MARGIN}x safety x {tightness:.2f}x tightness)"
+            )
+        else:
+            active_thr = effective_threshold
+            st.caption(f"Using global threshold `{active_thr:.4f}` (need >= 2 templates for personal threshold).")
+
+        # Lockout check
+        is_locked = st.session_state.auth_locked.get(selected_user, False)
+        if is_locked:
+            st.error(
+                f"**{selected_user}** is locked out due to repeated auth failures. "
+                "Contact an admin or re-enroll."
+            )
+            if st.button("Admin unlock (demo only)", key="unlock_btn"):
+                st.session_state.auth_locked[selected_user]       = False
+                st.session_state.auth_consec_fails[selected_user] = 0
+                st.session_state.stepup_required[selected_user]   = False
+                st.rerun()
+
+        elif n_templates < MIN_ENROLLMENT_TEMPLATES:
+            st.warning(
+                f"**{selected_user}** only has {n_templates} template(s). "
+                f"Need **{MIN_ENROLLMENT_TEMPLATES}** minimum. Add more in the Enroll tab."
+            )
+        elif compute_enrollment_quality(user_embs)["score"] < 0.60:
+            quality_score = int(compute_enrollment_quality(user_embs)["score"] * 100)
+            st.warning(
+                f"**{selected_user}**'s enrollment quality ({quality_score}%) is too low. "
+                f"Needs to be >= 60%. Please delete bad samples or re-enroll for a consistent baseline."
+            )
+        else:
+            if st.session_state.stepup_required.get(selected_user, False):
                 st.warning(
-                    f"Need >= {int(min_templates_for_auth)} template(s) for stable authentication. "
-                    f"Enroll {int(min_templates_for_auth) - n_templates} more in the Enroll tab."
+                    "Step-up verification required. Anomalous typing detected in a previous attempt. "
+                    "Retype the phrase to confirm your identity."
                 )
 
-            st.markdown("#### Step 1 - Type the sentence and copy the payload")
-            test_payload = build_keystroke_recorder("test")
-
-            st.markdown("#### Step 2 - Run authentication")
-            auth_clicked = st.form_submit_button(
-                "Authenticate",
-                type="primary",
-                use_container_width=True,
+            # Anti-replay nonce challenge
+            session_phrase = st.session_state.challenge_phrase
+            st.markdown(
+                f"<div style='background:rgba(0,240,255,0.05);border:1px solid rgba(0,240,255,0.2);"
+                f"border-radius:10px;padding:12px 18px;margin-bottom:12px;'>"
+                f"<span style='color:#94a3b8;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;'>"
+                f"Session Challenge Phrase</span><br>"
+                f"<b style='color:#00f0ff;font-size:1.05rem;'>\"{session_phrase}\"</b></div>",
+                unsafe_allow_html=True,
             )
-        if auth_clicked:
-            # --- pre-flight checks (no st.stop() inside tabs) ---
-            auth_error: Optional[str] = None
-            if not test_payload:
-                auth_error = "No payload. Type the sentence, copy the JSON, paste it above."
-            elif n_templates < int(min_templates_for_auth):
-                auth_error = (
-                    f"'{selected_user}' has {n_templates} template(s) "
-                    f"but {int(min_templates_for_auth)} are required."
-                )
-            elif effective_threshold is None:
-                auth_error = "No threshold set. Enable 'Override threshold' in the sidebar."
 
-            if auth_error:
-                st.warning(auth_error)
-            else:
-                # Parse keystroke sequence continuously
-                with st.spinner("Running inference..."):
-                    windows, decoded_txt = process_continuous_events(test_payload, SEQ_LEN, N_FEAT, window_stride)
+            with st.form("auth_form"):
+                st.markdown("#### Type the challenge phrase above and copy the payload")
+                test_payload = build_keystroke_recorder("test", session_phrase)
+                st.markdown("#### Run authentication")
+                auth_clicked = st.form_submit_button("Authenticate", type="primary", use_container_width=True)
 
-                if windows is not None and len(windows) > 0:
-                    # Keyword Gate — only enforced for the primary enrolled user "Raja"
-                    SECRET_KEYWORD = "gemini"
-                    PROTECTED_USER = "Raja"
-                    is_guest = False
-                    if selected_user == PROTECTED_USER and SECRET_KEYWORD not in decoded_txt.lower():
-                        is_guest = True
-
-                    llm_blocked = False
-                    window_scores = []
-                    smoothed_scores = []
-                    consec = 0
-                    blocked_step = -1
-                    thr = float(effective_threshold)  # type: ignore[arg-type]
-
-                    # Process each sliding window
-                    for step, seq in enumerate(windows):
-                        if enable_llm_gate:
-                            is_llm, reason, confidence = detect_llm_paste.detect_llm_behavior(
-                                seq, threshold=float(llm_threshold)
-                            )
-                            if is_llm:
-                                llm_blocked = True
-                                blocked_step = step
-                                break
-
-                        # Compute query embedding and compare against gallery
-                        batch     = np.expand_dims(seq, axis=0)
-                        query_emb = model.predict(batch, verbose=0)[0].astype(np.float32)
-                        mean_dist, min_dist = gallery_distance(
-                            st.session_state.enrollments[selected_user], query_emb
-                        )
-                        
-                        window_scores.append(mean_dist)
-                        
-                        # Apply smoothing
-                        start_idx = max(0, len(window_scores) - int(decision_window))
-                        smoothed = float(np.mean(window_scores[start_idx:]))
-                        smoothed_scores.append(smoothed)
-                        
-                        if smoothed > thr or is_guest:
-                            consec += 1
-                            if consec >= int(alarm_consecutive):
-                                blocked_step = step
-                                break
-                        else:
-                            consec = 0
-
-                    st.divider()
-                    st.markdown("### Continuous Authentication Progress")
-                    if smoothed_scores:
-                        import pandas as pd
-                        chart_data = pd.DataFrame({
-                            "Smoothed Score": smoothed_scores,
-                            "Threshold": [thr] * len(smoothed_scores)
-                        })
-                        st.line_chart(chart_data)
-                        
-                        # Display latest metric
-                        st.metric("Latest Smoothed Score", f"{smoothed_scores[-1]:.4f}")
-
-                    if llm_blocked:
-                        st.error(f"## 🚫 ACCESS DENIED (Step {blocked_step+1})")
-                        st.markdown(f"""
-                        <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 12px; padding: 20px; text-align: center;">
-                            <h3 style="color: #ef4444; margin: 0;">UNNATURAL INPUT DETECTED</h3>
-                            <p style="color: #94a3b8; margin-top: 10px;">The Dual-Gate policy has intercepted a non-human rhythmic pattern.</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    elif blocked_step != -1:
-                        st.error(f"## ACCESS DENIED (Step {blocked_step+1})")
-                        if is_guest:
-                            st.caption(
-                                "Behavioral signature analysis complete. "
-                                "Multi-factor verification requirements not satisfied."
-                            )
-                        else:
-                            st.caption(
-                                f"Consecutive smoothed scores exceeded threshold {thr:.4f}. "
-                                "Biometric signature did not match enrolled profile."
-                            )
+            if auth_clicked:
+                if not test_payload:
+                    st.warning("No payload. Type -> Copy JSON -> Paste -> Authenticate.")
+                else:
+                    # Gate 1: Plausibility
+                    try:
+                        raw_evts = json.loads(test_payload)
+                    except Exception:
+                        raw_evts = []
+                    suspicious, sus_reason = check_typing_plausibility(raw_evts)
+                    if suspicious:
+                        st.error(f"ACCESS DENIED — Suspicious input: {sus_reason}")
+                        fails = st.session_state.auth_consec_fails.get(selected_user, 0) + 1
+                        st.session_state.auth_consec_fails[selected_user] = fails
+                        if fails >= MAX_CONSEC_FAILS_LOCKOUT:
+                            st.session_state.auth_locked[selected_user] = True
+                            st.rerun()
                     else:
-                        st.success("## ACCESS GRANTED")
-                        st.balloons()
+                        with st.spinner("Running continuous inference..."):
+                            windows, decoded_txt = process_continuous_events(
+                                test_payload, SEQ_LEN, N_FEAT, int(window_stride)
+                            )
 
-                    # Clear test payload regardless of outcome
+                        if windows is not None and len(windows) > 0:
+                            llm_blocked     = False
+                            blocked_step    = -1
+                            window_scores   = []
+                            smoothed_scores = []
+                            consec_high     = 0
+                            thr = float(active_thr)
+
+                            for step, seq in enumerate(windows):
+                                # Gate 2: LLM/paste detection
+                                if enable_llm_gate:
+                                    is_llm, _, llm_conf = detect_llm_paste.detect_llm_behavior(
+                                        seq, threshold=float(llm_threshold)
+                                    )
+                                    if is_llm:
+                                        llm_blocked  = True
+                                        blocked_step = step
+                                        break
+
+                                # Gate 3: Biometric distance
+                                batch      = np.expand_dims(seq, axis=0)
+                                query_emb  = model.predict(batch, verbose=0)[0].astype(np.float32)
+                                mean_dist, _ = gallery_distance(user_embs, query_emb)
+                                window_scores.append(mean_dist)
+                                start_idx  = max(0, len(window_scores) - int(decision_window))
+                                smoothed   = float(np.mean(window_scores[start_idx:]))
+                                smoothed_scores.append(smoothed)
+                                if smoothed > thr:
+                                    consec_high += 1
+                                    if consec_high >= MAX_CONSEC_FAILS_STEPUP:
+                                        blocked_step = step
+                                        break
+                                else:
+                                    consec_high = 0
+
+                            # Metrics
+                            st.divider()
+                            if smoothed_scores:
+                                d1, d2, d3, d4 = st.columns(4)
+                                _fs  = smoothed_scores[-1]
+                                _gap = thr - _fs
+                                d1.metric("Final Dist Score", f"{_fs:.4f}")
+                                d2.metric("Personal Threshold", f"{thr:.4f}")
+                                d3.metric("Gap (thr - score)", f"{_gap:.4f}",
+                                          delta=f"{'SAFE' if _gap > 0 else 'BREACH'}",
+                                          delta_color="normal")
+                                d4.metric("Windows Analysed", len(smoothed_scores))
+
+                            # Verdict
+                            if llm_blocked:
+                                st.error(f"## ACCESS DENIED — LLM/Paste attack (step {blocked_step+1})")
+                                fails = st.session_state.auth_consec_fails.get(selected_user, 0) + 1
+                                st.session_state.auth_consec_fails[selected_user] = fails
+                                if fails >= MAX_CONSEC_FAILS_LOCKOUT:
+                                    st.session_state.auth_locked[selected_user] = True
+                                    st.error(f"{selected_user} is now locked out.")
+                                    st.rerun()
+
+                            elif blocked_step != -1:
+                                fails = st.session_state.auth_consec_fails.get(selected_user, 0) + 1
+                                st.session_state.auth_consec_fails[selected_user] = fails
+                                if fails >= MAX_CONSEC_FAILS_LOCKOUT:
+                                    st.session_state.auth_locked[selected_user] = True
+                                    st.error(f"## ACCESS DENIED — {selected_user} locked out after {fails} failures.")
+                                    st.rerun()
+                                elif fails >= MAX_CONSEC_FAILS_STEPUP:
+                                    st.session_state.stepup_required[selected_user] = True
+                                    st.error(
+                                        f"## ACCESS DENIED (attempt {fails}/{MAX_CONSEC_FAILS_LOCKOUT})\n\n"
+                                        f"Score exceeded threshold `{thr:.4f}`."
+                                    )
+                                else:
+                                    st.session_state.stepup_required[selected_user] = True
+                                    st.warning(
+                                        f"Step-up required — score anomaly detected "
+                                        f"({fails}/{MAX_CONSEC_FAILS_STEPUP} soft warnings). "
+                                        "Retype to confirm your identity."
+                                    )
+                            else:
+                                # Success
+                                is_verified = True
+
+                                if not is_verified:
+                                    fails = st.session_state.auth_consec_fails.get(selected_user, 0) + 1
+                                    st.session_state.auth_consec_fails[selected_user] = fails
+                                    if fails >= MAX_CONSEC_FAILS_LOCKOUT:
+                                        st.session_state.auth_locked[selected_user] = True
+                                        st.error(f"## ACCESS DENIED — {selected_user} locked out after {fails} failures.")
+                                        st.rerun()
+                                    else:
+                                        st.error(f"## ACCESS DENIED (attempt {fails}/{MAX_CONSEC_FAILS_LOCKOUT})")
+                                        st.info("Biometric verification failed. Please try again with a steady rhythm.")
+                                else:
+                                    # Reset failures on success
+                                    st.session_state.auth_consec_fails[selected_user] = 0
+                                    st.session_state.stepup_required[selected_user]   = False
+                                    
+                                    # Rolling gallery update
+                                    if windows:
+                                        last_emb = model.predict(
+                                            np.expand_dims(windows[-1], axis=0), verbose=0
+                                        )[0].astype(np.float32)
+                                        updated = update_rolling_gallery(user_embs, last_emb)
+                                        st.session_state.enrollments[selected_user] = updated
+                                        try:
+                                            save_enrollments(
+                                                st.session_state.enrollments,
+                                                SEQ_LEN, N_FEAT, checkpoint_hash, threshold_source,
+                                            )
+                                        except Exception:
+                                            pass
+                                    st.success("## ACCESS GRANTED")
+                                    st.balloons()
+                                    import random as _r
+                                    st.session_state.challenge_phrase = _r.choice(CHALLENGE_PHRASES)
+
                     st.session_state["ksr_payload_test"] = ""
+
+                    _q_stats = extract_timing_stats(raw_evts) if raw_evts else {}
+                    _baseline = st.session_state.enrollment_timing.get(selected_user, {})
+                    _verdict_str = "ACCESS GRANTED" if blocked_step == -1 and not llm_blocked and not suspicious else "ACCESS DENIED"
+                    _granted = _verdict_str == "ACCESS GRANTED"
+
+                    if _q_stats and _baseline:
+                        with st.expander("🔬 Explainable AI — Timing Signature Breakdown", expanded=_verdict_str=="ACCESS DENIED"):
+                            st.caption("This chart compares genuine baseline timing (blue) vs this attempt (red).")
+                            _q_label = "Genuine User" if _granted else "Impostor"
+                            render_xai_comparison(_q_stats, _baseline, label=_q_label)
+
+
+
+
+
+
+
 
